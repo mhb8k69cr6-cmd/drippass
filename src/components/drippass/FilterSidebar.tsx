@@ -172,7 +172,7 @@ export function FilterSidebar({
               min={300}
               max={1500}
               step={50}
-              onValueChange={([v]) => set({ maxPerDay: v })}
+              onValueChange={(v) => set({ maxPerDay: v[0] ?? 1500 })}
             />
             <p className="mt-3 text-xs text-muted-foreground">
               Up to <span className="font-medium text-foreground">₹{filters.maxPerDay}</span> / day
