@@ -23,7 +23,7 @@ export function CartSheet({
   items: CartItem[];
   onRemove: (id: string) => void;
 }) {
-  const [slot, setSlot] = useState(SLOTS[0]);
+  const [slot, setSlot] = useState<string>(SLOTS[0]!);
   const [code, setCode] = useState("");
   const [discount, setDiscount] = useState(0);
 
