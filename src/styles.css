@@ -150,5 +150,33 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
   }
 }
+
+@utility font-display {
+  font-family: var(--font-display);
+}
+
+@utility bg-gradient-neon {
+  background-image: var(--gradient-neon);
+}
+
+@utility bg-gradient-luxe {
+  background-image: var(--gradient-luxe);
+}
+
+@utility shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+
+@utility tracking-luxe {
+  letter-spacing: 0.28em;
+}
+
