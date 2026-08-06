@@ -16,6 +16,8 @@ import { AIStudio } from "@/components/drippass/AIStudio";
 import { ProductModal } from "@/components/drippass/ProductModal";
 import { CartSheet, type CartItem } from "@/components/drippass/CartSheet";
 import { SubscriptionPlans } from "@/components/drippass/SubscriptionPlans";
+import { LookbookSheet } from "@/components/drippass/LookbookSheet";
+import { useLookbook } from "@/lib/lookbook";
 import { BANNERS, PRODUCTS, type Product } from "@/data/products";
 
 export const Route = createFileRoute("/")({
@@ -48,7 +50,10 @@ function Home() {
   const [modalOpen, setModalOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [saved, setSaved] = useState<string[]>([]);
+  const { wishlist: saved, toggleWishlist: toggleSave, looks, saveLook, removeLook, setCaption } =
+    useLookbook();
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [accountTab, setAccountTab] = useState("wishlist");
   const [banner, setBanner] = useState(0);
 
   const products = useMemo(() => {
@@ -78,8 +83,26 @@ function Home() {
     toast.success(`${product.title} reserved for ${days} days`);
   };
 
-  const toggleSave = (id: string) => {
-    setSaved((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+  const handleSaveLook = (
+    product: Product,
+    look: { photo: string | null; fit: number; pose: number },
+  ) => {
+    saveLook({
+      productId: product.id,
+      title: product.title,
+      designer: product.designer,
+      category: product.category,
+      image: product.image,
+      photo: look.photo,
+      fit: look.fit,
+      pose: look.pose,
+    });
+    toast.success("Look saved to your lookbook");
+  };
+
+  const openAccount = (t: string) => {
+    setAccountTab(t);
+    setAccountOpen(true);
   };
 
   const active = BANNERS[banner]!;
@@ -96,6 +119,8 @@ function Home() {
           else setTab("feed");
         }}
         onOpenCart={() => setCartOpen(true)}
+        onOpenWishlist={() => openAccount("wishlist")}
+        onOpenLookbook={() => openAccount("lookbook")}
       />
 
       <main className="mx-auto max-w-[1600px] px-4 py-5">
@@ -246,7 +271,8 @@ function Home() {
                 <AIStudio
                   product={selected}
                   onRent={() => selected && addToCart(selected, 7)}
-                  onSave={() => selected && toggleSave(selected.id)}
+                  onSave={(look) => selected && handleSaveLook(selected, look)}
+                  onShare={() => openAccount("lookbook")}
                 />
               </TabsContent>
 
@@ -269,7 +295,8 @@ function Home() {
                 <AIStudio
                   product={selected}
                   onRent={() => selected && addToCart(selected, 7)}
-                  onSave={() => selected && toggleSave(selected.id)}
+                  onSave={(look) => selected && handleSaveLook(selected, look)}
+                  onShare={() => openAccount("lookbook")}
                 />
               </div>
             </div>
@@ -302,6 +329,22 @@ function Home() {
         onOpenChange={setCartOpen}
         items={cart}
         onRemove={(id) => setCart((c) => c.filter((i) => i.product.id !== id))}
+      />
+      <LookbookSheet
+        open={accountOpen}
+        onOpenChange={setAccountOpen}
+        tab={accountTab}
+        onTabChange={setAccountTab}
+        wishlist={saved}
+        looks={looks}
+        onToggleWishlist={toggleSave}
+        onRemoveLook={removeLook}
+        onCaption={setCaption}
+        onOpenProduct={(p) => {
+          setSelected(p);
+          setAccountOpen(false);
+          setModalOpen(true);
+        }}
       />
       <Toaster />
     </div>

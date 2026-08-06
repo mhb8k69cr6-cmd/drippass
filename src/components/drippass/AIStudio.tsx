@@ -34,10 +34,12 @@ export function AIStudio({
   product,
   onRent,
   onSave,
+  onShare,
 }: {
   product: Product | null;
   onRent: () => void;
-  onSave: () => void;
+  onSave: (look: { photo: string | null; fit: number; pose: number }) => void;
+  onShare: () => void;
 }) {
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [fit, setFit] = useState(55);
@@ -244,12 +246,17 @@ export function AIStudio({
           <ShoppingBag className="size-4" /> Rent This Outfit
         </Button>
         <div className="grid grid-cols-2 gap-2">
-          <Button variant="outline" onClick={onSave} disabled={!product} className="gap-1.5 rounded-none text-xs">
+          <Button
+            variant="outline"
+            onClick={() => onSave({ photo: userPhoto, fit, pose })}
+            disabled={!product}
+            className="gap-1.5 rounded-none text-xs"
+          >
             <Bookmark className="size-3.5" /> Save Look
           </Button>
           <Button
             variant="outline"
-            onClick={() => toast.success("Look copied — share it on Instagram or TikTok")}
+            onClick={onShare}
             className="gap-1.5 rounded-none text-xs"
           >
             <Instagram className="size-3.5" /> Share Look
