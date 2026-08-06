@@ -19,6 +19,7 @@ import { SubscriptionPlans } from "@/components/drippass/SubscriptionPlans";
 import { LookbookSheet } from "@/components/drippass/LookbookSheet";
 import { useLookbook } from "@/lib/lookbook";
 import { BANNERS, PRODUCTS, type Product } from "@/data/products";
+import logoAsset from "@/assets/drippass-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -306,10 +307,11 @@ function Home() {
 
       <footer className="mt-10 border-t border-border bg-card">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-4 px-4 py-8 text-xs text-muted-foreground">
-          <div>
-            <p className="font-display text-xl text-foreground">DRIPPASS</p>
-            <p className="tracking-luxe">WEAR. RETURN. REPEAT.</p>
-          </div>
+          <img
+            src={logoAsset.url}
+            alt="DRIPPASS — Wear. Return. Repeat."
+            className="h-14 w-auto object-contain"
+          />
           <p>Sanitized rentals · Prepaid returns · Delivered across 14 cities</p>
         </div>
       </footer>
