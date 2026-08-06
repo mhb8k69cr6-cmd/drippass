@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { CATEGORIES } from "@/data/products";
+import logoAsset from "@/assets/drippass-logo.png.asset.json";
 import { toast } from "sonner";
 
 const SUGGESTIONS = [
@@ -68,7 +69,7 @@ export function SiteHeader({
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-72 p-6">
-            <p className="font-display text-2xl">DRIPPASS</p>
+            <img src={logoAsset.url} alt="DRIPPASS" className="h-12 w-auto object-contain" />
             <nav className="mt-6 flex flex-col gap-1">
               {CATEGORIES.map((c) => (
                 <button
@@ -83,11 +84,14 @@ export function SiteHeader({
           </SheetContent>
         </Sheet>
 
-        <a href="/" className="shrink-0 leading-none">
-          <span className="font-display text-2xl font-bold tracking-tight">DRIPPASS</span>
-          <span className="block text-[9px] tracking-luxe text-muted-foreground">
-            WEAR. RETURN. REPEAT.
-          </span>
+        <a href="/" className="shrink-0 leading-none" aria-label="DRIPPASS home">
+          <img
+            src={logoAsset.url}
+            alt="DRIPPASS — Wear. Return. Repeat."
+            width={946}
+            height={335}
+            className="h-14 w-auto object-contain md:h-16"
+          />
         </a>
 
         <button
