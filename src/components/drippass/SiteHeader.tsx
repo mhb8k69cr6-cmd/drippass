@@ -90,7 +90,7 @@ export function SiteHeader({
             alt="DRIPPASS — Wear. Return. Repeat."
             width={946}
             height={335}
-            className="h-11 w-auto object-contain md:h-12"
+            className="h-14 w-auto object-contain md:h-16"
           />
         </a>
 
