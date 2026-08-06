@@ -38,6 +38,8 @@ type Props = {
   activeCategory: string;
   onCategory: (c: string) => void;
   onOpenCart: () => void;
+  onOpenWishlist: () => void;
+  onOpenLookbook: () => void;
 };
 
 export function SiteHeader({
@@ -46,6 +48,8 @@ export function SiteHeader({
   activeCategory,
   onCategory,
   onOpenCart,
+  onOpenWishlist,
+  onOpenLookbook,
 }: Props) {
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
@@ -165,14 +169,20 @@ export function SiteHeader({
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Hey, Aanya</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>My Rentals</DropdownMenuItem>
-            <DropdownMenuItem>My Lookbook</DropdownMenuItem>
+            <DropdownMenuItem onClick={onOpenWishlist}>My Wishlist</DropdownMenuItem>
+            <DropdownMenuItem onClick={onOpenLookbook}>My Lookbook</DropdownMenuItem>
             <DropdownMenuItem>Manage Pass</DropdownMenuItem>
             <DropdownMenuItem>Return Pickups</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button variant="ghost" size="icon" className="relative" aria-label="Saved outfits">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          onClick={onOpenWishlist}
+          aria-label="Saved outfits"
+        >
           <Heart />
           {wishlistCount > 0 && (
             <span className="absolute -right-0.5 -top-0.5 rounded-full bg-foreground px-1.5 text-[10px] text-background">
