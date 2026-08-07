@@ -231,6 +231,28 @@ export function LookbookSheet({
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="managePass" className="mt-0 flex-1 overflow-y-auto px-4 pb-6">
+            <div className="py-16 text-center text-sm text-muted-foreground">
+              Manage your subscription pass and VIP benefits here.
+              <div className="mt-4 space-y-2 text-left text-xs text-foreground">
+                <p className="font-medium">Unlimited VIP Pass</p>
+                <p>Swap access, instant delivery priority and exclusive styling perks.</p>
+                <Button size="sm" className="rounded-none bg-gradient-neon text-foreground" onClick={() => toast("Pass management coming soon")}>Manage Pass</Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="returnPickups" className="mt-0 flex-1 overflow-y-auto px-4 pb-6">
+            <div className="py-16 text-center text-sm text-muted-foreground">
+              Schedule your return pickup or track existing orders.
+              <div className="mt-4 space-y-2 text-left text-xs text-foreground">
+                <p className="font-medium">Return Pickups</p>
+                <p>We’ll collect your fit from the address on file at the next available slot.</p>
+                <Button size="sm" className="rounded-none bg-gradient-neon text-foreground" onClick={() => toast("Pickup scheduling coming soon")}>Schedule pickup</Button>
+              </div>
+            </div>
+          </TabsContent>
         </Tabs>
       </SheetContent>
     </Sheet>

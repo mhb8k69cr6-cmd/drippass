@@ -9,6 +9,8 @@ import {
   ShoppingBag,
   ShieldCheck,
   Loader2,
+  Minus,
+  X,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -35,11 +37,13 @@ export function AIStudio({
   onRent,
   onSave,
   onShare,
+  onOpenChange,
 }: {
   product: Product | null;
   onRent: () => void;
   onSave: (look: { photo: string | null; fit: number; pose: number }) => void;
   onShare: () => void;
+  onOpenChange?: (value: boolean) => void;
 }) {
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [fit, setFit] = useState(55);
@@ -47,6 +51,11 @@ export function AIStudio({
   const [localOnly, setLocalOnly] = useState(true);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
+  const [open, setOpen] = useState(false);
+  const setOpenState = (value: boolean) => {
+    setOpen(value);
+    onOpenChange?.(value);
+  };
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
@@ -86,19 +95,36 @@ export function AIStudio({
   };
 
   return (
-    <div className="flex h-full flex-col border border-border bg-card">
-      <div className="flex items-center justify-between border-b border-border bg-gradient-luxe px-4 py-3 text-primary-foreground">
-        <div>
-          <h2 className="font-display text-base leading-tight">AI Visual Try-On Studio</h2>
-          <p className="text-[10px] tracking-luxe opacity-70">FITTING ROOM & STYLIST</p>
-        </div>
-        <Badge className="gap-1 rounded-none bg-neon text-[10px] text-neon-foreground">
-          <span className="size-1.5 animate-pulse rounded-full bg-current" /> ACTIVE
-        </Badge>
-      </div>
+    <>
+      <Button
+        type="button"
+        size="icon"
+        className="fixed bottom-4 right-4 z-50 h-14 w-14 rounded-full bg-gradient-neon text-foreground shadow-soft"
+        onClick={() => setOpenState(!open)}
+        aria-label={open ? "Minimize AI studio" : "Open AI studio"}
+      >
+        <Sparkles className="size-5" />
+      </Button>
 
-      <div className="flex-1 space-y-5 overflow-y-auto p-4">
-        {/* Step 1 */}
+      {open && (
+        <div className="fixed bottom-24 right-4 z-50 flex h-[80vh] w-[min(92vw,420px)] flex-col overflow-hidden border border-border bg-card shadow-soft">
+          <div className="flex items-center justify-between border-b border-border bg-gradient-luxe px-4 py-3 text-primary-foreground">
+            <div>
+              <h2 className="font-display text-base leading-tight">AI Visual Try-On Studio</h2>
+              <p className="text-[10px] tracking-luxe opacity-70">FITTING ROOM & STYLIST</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-primary-foreground hover:bg-white/10" onClick={() => setOpenState(false)}>
+                <Minus className="size-4" />
+              </Button>
+              <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-primary-foreground hover:bg-white/10" onClick={() => setOpenState(false)}>
+                <X className="size-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex-1 space-y-5 overflow-y-auto p-4">
+              {/* Step 1 */}
         <section>
           <p className="mb-2 text-[10px] tracking-luxe text-muted-foreground">STEP 1 — YOUR PHOTO</p>
           <div className="grid grid-cols-2 gap-2">
@@ -241,31 +267,33 @@ export function AIStudio({
         </section>
       </div>
 
-      <div className="grid gap-2 border-t border-border p-4">
-        <Button onClick={onRent} disabled={!product} className="w-full gap-2 rounded-none bg-gradient-neon text-foreground hover:opacity-90">
-          <ShoppingBag className="size-4" /> Rent This Outfit
-        </Button>
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            onClick={() => onSave({ photo: userPhoto, fit, pose })}
-            disabled={!product}
-            className="gap-1.5 rounded-none text-xs"
-          >
-            <Bookmark className="size-3.5" /> Save Look
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onShare}
-            className="gap-1.5 rounded-none text-xs"
-          >
-            <Instagram className="size-3.5" /> Share Look
-          </Button>
+          <div className="grid gap-2 border-t border-border p-4">
+            <Button onClick={onRent} disabled={!product} className="w-full gap-2 rounded-none bg-gradient-neon text-foreground hover:opacity-90">
+              <ShoppingBag className="size-4" /> Rent This Outfit
+            </Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                onClick={() => onSave({ photo: userPhoto, fit, pose })}
+                disabled={!product}
+                className="gap-1.5 rounded-none text-xs"
+              >
+                <Bookmark className="size-3.5" /> Save Look
+              </Button>
+              <Button
+                variant="outline"
+                onClick={onShare}
+                className="gap-1.5 rounded-none text-xs"
+              >
+                <Instagram className="size-3.5" /> Share Look
+              </Button>
+            </div>
+            <p className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
+              <Sparkles className="size-3" /> Powered by DRIPPASS AI
+            </p>
+          </div>
         </div>
-        <p className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
-          <Sparkles className="size-3" /> Powered by DRIPPASS AI
-        </p>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

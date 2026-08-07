@@ -10,6 +10,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/drippass/SiteHeader";
+import { AuthDialog } from "@/components/drippass/AuthDialog";
 import { FilterSidebar, DEFAULT_FILTERS, type Filters } from "@/components/drippass/FilterSidebar";
 import { ProductCard } from "@/components/drippass/ProductCard";
 import { AIStudio } from "@/components/drippass/AIStudio";
@@ -19,7 +20,7 @@ import { SubscriptionPlans } from "@/components/drippass/SubscriptionPlans";
 import { LookbookSheet } from "@/components/drippass/LookbookSheet";
 import { useLookbook } from "@/lib/lookbook";
 import { BANNERS, PRODUCTS, type Product } from "@/data/products";
-import logoAsset from "@/assets/drippass-logo.png.asset.json";
+import { DrippassLogo } from "@/components/drippass/DrippassLogo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -55,10 +56,24 @@ function Home() {
     useLookbook();
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountTab, setAccountTab] = useState("wishlist");
+  const [authOpen, setAuthOpen] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [location, setLocation] = useState("110001, Delhi");
   const [banner, setBanner] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [aiStudioOpen, setAIStudioOpen] = useState(false);
 
   const products = useMemo(() => {
     const list = PRODUCTS.filter((p) => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matches =
+          p.title.toLowerCase().includes(q) ||
+          p.designer.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          p.event.toLowerCase().includes(q);
+        if (!matches) return false;
+      }
       if (filters.categories.length && !filters.categories.includes(p.category)) return false;
       if (filters.sizes.length && !filters.sizes.some((s) => p.sizes.includes(s))) return false;
       if (filters.genders.length && !filters.genders.includes(p.gender)) return false;
@@ -71,7 +86,7 @@ function Home() {
     if (sort === "high") return [...list].sort((a, b) => b.perDay - a.perDay);
     if (sort === "rating") return [...list].sort((a, b) => b.rating - a.rating);
     return list;
-  }, [filters, sort]);
+  }, [filters, sort, searchQuery]);
 
   const addToCart = (product: Product, days: number) => {
     if (!product.available) {
@@ -106,6 +121,28 @@ function Home() {
     setAccountOpen(true);
   };
 
+  const openAuth = () => setAuthOpen(true);
+
+  const logout = () => {
+    setUserName(null);
+    toast.success("You have been logged out");
+  };
+
+  const signUp = (name: string) => {
+    setUserName(name);
+    setAuthOpen(false);
+    toast.success(`Welcome, ${name}!`);
+    openAccount("wishlist");
+  };
+
+  const openManagePass = () => {
+    openAccount("managePass");
+  };
+
+  const openReturnPickups = () => {
+    openAccount("returnPickups");
+  };
+
   const active = BANNERS[banner]!;
 
   return (
@@ -120,8 +157,30 @@ function Home() {
           else setTab("feed");
         }}
         onOpenCart={() => setCartOpen(true)}
-        onOpenWishlist={() => openAccount("wishlist")}
-        onOpenLookbook={() => openAccount("lookbook")}
+        onOpenWishlist={() => {
+          if (userName) openAccount("wishlist");
+          else openAuth();
+        }}
+        onOpenLookbook={() => {
+          if (userName) openAccount("lookbook");
+          else openAuth();
+        }}
+        onSearch={(query) => {
+          setSearchQuery(query);
+          setTab("feed");
+        }}
+        onLogin={userName ? logout : openAuth}
+        location={location}
+        onLocationChange={setLocation}
+        onManagePass={() => {
+          if (userName) openManagePass();
+          else openAuth();
+        }}
+        onReturnPickups={() => {
+          if (userName) openReturnPickups();
+          else openAuth();
+        }}
+        userName={userName ?? undefined}
       />
 
       <main className="mx-auto max-w-[1600px] px-4 py-5">
@@ -165,7 +224,11 @@ function Home() {
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_360px]">
+          <div
+            className={`grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] ${
+              aiStudioOpen ? 'xl:grid-cols-[220px_minmax(0,1fr)_360px]' : 'xl:grid-cols-[220px_minmax(0,1fr)]'
+            }`}
+          >
             <div className="hidden lg:block">
               <FilterSidebar filters={filters} onChange={setFilters} />
             </div>
@@ -227,7 +290,9 @@ function Home() {
                 </section>
 
                 <div className="flex items-center justify-between">
-                  <h2 className="font-display text-xl">{category}</h2>
+                  <h2 className="font-display text-xl">
+                    {searchQuery.trim() ? `Results for "${searchQuery}"` : category}
+                  </h2>
                   <Badge variant="outline" className="rounded-none text-[10px]">
                     {products.length} FITS AVAILABLE
                   </Badge>
@@ -253,7 +318,9 @@ function Home() {
                 </div>
                 {products.length === 0 && (
                   <p className="py-16 text-center text-sm text-muted-foreground">
-                    No fits match these filters. Loosen them up.
+                    {searchQuery.trim()
+                      ? `No fits match "${searchQuery}". Try another search or loosen your filters.`
+                      : "No fits match these filters. Loosen them up."}
                   </p>
                 )}
               </TabsContent>
@@ -274,6 +341,7 @@ function Home() {
                   onRent={() => selected && addToCart(selected, 7)}
                   onSave={(look) => selected && handleSaveLook(selected, look)}
                   onShare={() => openAccount("lookbook")}
+                  onOpenChange={setAIStudioOpen}
                 />
               </TabsContent>
 
@@ -307,11 +375,7 @@ function Home() {
 
       <footer className="mt-10 border-t border-border bg-card">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-4 px-4 py-8 text-xs text-muted-foreground">
-          <img
-            src={logoAsset.url}
-            alt="DRIPPASS — Wear. Return. Repeat."
-            className="h-14 w-auto object-contain"
-          />
+          <DrippassLogo variant="footer" />
           <p>Sanitized rentals · Prepaid returns · Delivered across 14 cities</p>
         </div>
       </footer>
@@ -332,6 +396,7 @@ function Home() {
         items={cart}
         onRemove={(id) => setCart((c) => c.filter((i) => i.product.id !== id))}
       />
+      <AuthDialog open={authOpen} onOpenChange={setAuthOpen} onSignUp={signUp} />
       <LookbookSheet
         open={accountOpen}
         onOpenChange={setAccountOpen}

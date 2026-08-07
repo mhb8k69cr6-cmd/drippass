@@ -8,10 +8,8 @@ import {
   Mic,
   ChevronDown,
   Menu,
-  Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -23,7 +21,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { CATEGORIES } from "@/data/products";
-import logoAsset from "@/assets/drippass-logo.png.asset.json";
+import { DrippassLogo } from "@/components/drippass/DrippassLogo";
+import { LocationPickerDialog } from "@/components/drippass/LocationPickerDialog";
 import { toast } from "sonner";
 
 const SUGGESTIONS = [
@@ -41,6 +40,13 @@ type Props = {
   onOpenCart: () => void;
   onOpenWishlist: () => void;
   onOpenLookbook: () => void;
+  onSearch: (query: string) => void;
+  onLogin: () => void;
+  onManagePass: () => void;
+  onReturnPickups: () => void;
+  userName?: string;
+  location?: string;
+  onLocationChange?: (location: string) => void;
 };
 
 export function SiteHeader({
@@ -51,9 +57,28 @@ export function SiteHeader({
   onOpenCart,
   onOpenWishlist,
   onOpenLookbook,
+  onSearch,
+  onLogin,
+  onManagePass,
+  onReturnPickups,
+  userName,
+  location,
+  onLocationChange,
 }: Props) {
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
+  const [locationOpen, setLocationOpen] = useState(false);
+
+  const submitSearch = () => {
+    const trimmed = query.trim();
+    onSearch(trimmed);
+    setFocused(false);
+    if (trimmed) {
+      toast.success(`Showing results for "${trimmed}"`);
+    } else {
+      toast("Showing all fits");
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
@@ -69,7 +94,7 @@ export function SiteHeader({
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-72 p-6">
-            <img src={logoAsset.url} alt="DRIPPASS" className="h-12 w-auto object-contain" />
+            <DrippassLogo variant="menu" alt="DRIPPASS" />
             <nav className="mt-6 flex flex-col gap-1">
               {CATEGORIES.map((c) => (
                 <button
@@ -85,22 +110,16 @@ export function SiteHeader({
         </Sheet>
 
         <a href="/" className="shrink-0 leading-none" aria-label="DRIPPASS home">
-          <img
-            src={logoAsset.url}
-            alt="DRIPPASS — Wear. Return. Repeat."
-            width={946}
-            height={335}
-            className="h-14 w-auto object-contain md:h-16"
-          />
+          <DrippassLogo variant="header" />
         </a>
 
         <button
-          onClick={() => toast("Serviceable in 110001 — same-day slots open")}
+          onClick={() => setLocationOpen(true)}
           className="hidden items-center gap-2 rounded-sm border border-border px-3 py-2 text-left text-xs hover:bg-muted md:flex"
         >
           <MapPin className="size-4 text-gold" />
           <span>
-            <span className="block text-muted-foreground">Deliver to 110001</span>
+            <span className="block text-muted-foreground">{location ? `Deliver to ${location}` : "Set your location"}</span>
             <span className="font-medium">Check availability</span>
           </span>
         </button>
@@ -126,6 +145,12 @@ export function SiteHeader({
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setFocused(true)}
               onBlur={() => setTimeout(() => setFocused(false), 150)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  submitSearch();
+                }
+              }}
               placeholder="Search 12,400+ rentable fits, designers & events"
               className="h-11 border-0 bg-transparent shadow-none focus-visible:ring-0"
             />
@@ -137,6 +162,8 @@ export function SiteHeader({
               <Mic className="size-4" />
             </button>
             <button
+              type="button"
+              onClick={submitSearch}
               className="flex h-11 items-center bg-gradient-neon px-5 text-foreground"
               aria-label="Search"
             >
@@ -149,7 +176,12 @@ export function SiteHeader({
               {SUGGESTIONS.filter((s) => s.includes(query.toLowerCase())).map((s) => (
                 <button
                   key={s}
-                  onMouseDown={() => setQuery(s)}
+                  onMouseDown={() => {
+                    setQuery(s);
+                    onSearch(s);
+                    setFocused(false);
+                    toast.success(`Showing results for "${s}"`);
+                  }}
                   className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm hover:bg-muted"
                 >
                   <Search className="size-3.5 text-muted-foreground" />
@@ -160,10 +192,6 @@ export function SiteHeader({
           )}
         </div>
 
-        <Badge className="hidden gap-1 bg-gold text-gold-foreground xl:flex">
-          <Crown className="size-3" /> VIP Pass Active
-        </Badge>
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" aria-label="Account">
@@ -171,12 +199,20 @@ export function SiteHeader({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Hey, Aanya</DropdownMenuLabel>
+            <DropdownMenuLabel>Hey, {userName ?? "Guest"}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onOpenWishlist}>My Wishlist</DropdownMenuItem>
-            <DropdownMenuItem onClick={onOpenLookbook}>My Lookbook</DropdownMenuItem>
-            <DropdownMenuItem>Manage Pass</DropdownMenuItem>
-            <DropdownMenuItem>Return Pickups</DropdownMenuItem>
+            {userName ? (
+              <>
+                <DropdownMenuItem onClick={onOpenWishlist}>My Wishlist</DropdownMenuItem>
+                <DropdownMenuItem onClick={onOpenLookbook}>My Lookbook</DropdownMenuItem>
+                <DropdownMenuItem onClick={onManagePass}>Manage Pass</DropdownMenuItem>
+                <DropdownMenuItem onClick={onReturnPickups}>Return Pickups</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onLogin}>Logout</DropdownMenuItem>
+              </>
+            ) : (
+              <DropdownMenuItem onClick={onLogin}>Login / Sign up</DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -210,6 +246,16 @@ export function SiteHeader({
           )}
         </Button>
       </div>
+
+      <LocationPickerDialog
+        open={locationOpen}
+        onOpenChange={setLocationOpen}
+        initialLocation={location}
+        onLocationSelect={(selected) => {
+          onLocationChange?.(selected);
+          setLocationOpen(false);
+        }}
+      />
 
       <nav className="hidden border-t border-border lg:block">
         <div className="mx-auto flex max-w-[1600px] items-center gap-1 px-4">
