@@ -142,7 +142,7 @@ export function AIStudio({
       link.click();
       URL.revokeObjectURL(link.href);
       await navigator.clipboard.writeText(prompt);
-      window.open("https://gemini.com/images", "_blank", "noopener,noreferrer");
+      window.open("https://gemini.google.com/images", "_blank", "noopener,noreferrer");
       setCopied(true);
       toast.success("ZIP file downloaded & prompt copied! Open Gemini, upload '1_person_photo' and '2_garment_photo', then paste (Ctrl+V) the prompt.");
     } catch (error) {
