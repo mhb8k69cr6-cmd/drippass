@@ -21,6 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { askStylist } from "@/lib/stylist.functions";
 import { PRODUCTS, type Product } from "@/data/products";
+import { buildTryOnPrompt } from "@/lib/try-on-prompt";
 import { toast } from "sonner";
 
 type Msg = { role: "user" | "assistant"; text: string };
@@ -92,7 +93,7 @@ export function AIStudio({
 
   useEffect(() => setActiveProduct(product), [product]);
 
-  const prompt = `[DRIPPASS VIRTUAL TRY-ON STUDIO — DUAL-IMAGE COMPOSITION PROMPT]\n\nCONTEXT & IMAGE IDENTIFICATION:\n- IMAGE 1 (or first attachment): The PERSON / SUBJECT. Preserve their exact face, natural skin tone, facial features, hair structure, body shape, posture, and original background environment.\n- IMAGE 2 (or second attachment): The TARGET GARMENT (${activeProduct?.title ?? "ACTIVE_PRODUCT_TITLE"} by ${activeProduct?.designer ?? "ACTIVE_BRAND"}).\n\nINSTRUCTIONS FOR GEMINI:\n1. Photorealistically apply the TARGET GARMENT from Image 2 onto the SUBJECT in Image 1.\n2. Replace only the clothing worn by the person in Image 1 with the exact garment shown in Image 2.\n3. Ensure natural fabric drapery, realistic seam alignments, correct body contours, and accurate light source matching based on Image 1's ambient lighting.\n4. DO NOT alter the face, body proportions, background, or identity of the person in Image 1.\n5. Render one single, ultra-realistic, high-resolution fashion output image.`;
+  const prompt = buildTryOnPrompt(activeProduct?.title ?? "[INSERT GARMENT NAME]", activeProduct?.designer ?? "[INSERT BRAND NAME]");
 
   const handleFile = (file?: File) => {
     if (!file) return;
@@ -141,7 +142,7 @@ export function AIStudio({
       link.click();
       URL.revokeObjectURL(link.href);
       await navigator.clipboard.writeText(prompt);
-      window.open("https://gemini.google.com/app", "_blank", "noopener,noreferrer");
+      window.open("https://gemini.google.com/app/images", "_blank", "noopener,noreferrer");
       setCopied(true);
       toast.success("ZIP file downloaded & prompt copied! Open Gemini, upload '1_person_photo' and '2_garment_photo', then paste (Ctrl+V) the prompt.");
     } catch (error) {

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Copy, ExternalLink } from "lucide-react";
 import { AIStudio } from "@/components/drippass/AIStudio";
 import { PRODUCTS, getProductBySlug } from "@/data/products";
+import { buildTryOnPrompt } from "@/lib/try-on-prompt";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -21,14 +22,14 @@ function TryOnPage() {
   const { product: productSlug } = Route.useSearch();
   const product = getProductBySlug(productSlug ?? "") ?? PRODUCTS[0] ?? null;
   const [copied, setCopied] = useState(false);
-  const prompt = `[DRIPPASS VIRTUAL TRY-ON STUDIO — DUAL-IMAGE COMPOSITION PROMPT]\n\nCONTEXT & IMAGE IDENTIFICATION:\n- IMAGE 1 (or first attachment): The PERSON / SUBJECT. Preserve their exact face, natural skin tone, facial features, hair structure, body shape, posture, and original background environment.\n- IMAGE 2 (or second attachment): The TARGET GARMENT (${product?.title ?? "ACTIVE_PRODUCT_TITLE"} by ${product?.designer ?? "ACTIVE_BRAND"}).\n\nINSTRUCTIONS FOR GEMINI:\n1. Photorealistically apply the TARGET GARMENT from Image 2 onto the SUBJECT in Image 1.\n2. Replace only the clothing worn by the person in Image 1 with the exact garment shown in Image 2.\n3. Ensure natural fabric drapery, realistic seam alignments, correct body contours, and accurate light source matching based on Image 1's ambient lighting.\n4. DO NOT alter the face, body proportions, background, or identity of the person in Image 1.\n5. Render one single, ultra-realistic, high-resolution fashion output image.`;
+  const prompt = buildTryOnPrompt(product?.title ?? "[INSERT GARMENT NAME]", product?.designer ?? "[INSERT BRAND NAME]");
 
   const copyPrompt = async () => {
     try {
       await navigator.clipboard.writeText(prompt);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
-      window.open("https://gemini.google.com/app", "_blank", "noopener,noreferrer");
+      window.open("https://gemini.google.com/app/images", "_blank", "noopener,noreferrer");
       toast.success("Prompt copied to clipboard! Paste it directly into the Gemini window.");
     } catch {
       toast.error("Could not copy the prompt. Select the text and open Gemini manually.");
@@ -54,7 +55,7 @@ function TryOnPage() {
               <Button type="button" className="gap-2 rounded-none bg-gradient-neon text-foreground" onClick={copyPrompt}><Copy className="size-4" /> {copied ? "Copied · Gemini opened" : "Copy prompt & open Gemini"}</Button>
             </div>
             <textarea readOnly value={prompt} aria-label="Copyable Gemini context prompt" className="mt-4 min-h-28 w-full resize-y border border-border bg-background p-3 text-xs leading-relaxed outline-none" />
-            <a href="https://gemini.google.com/app" target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-xs underline"><ExternalLink className="size-3.5" /> Open Gemini</a>
+            <a href="https://gemini.google.com/app/images" target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-xs underline"><ExternalLink className="size-3.5" /> Open Gemini Images</a>
           </section>
           <AIStudio
             product={product}
