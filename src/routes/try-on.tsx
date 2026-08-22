@@ -29,7 +29,7 @@ function TryOnPage() {
       await navigator.clipboard.writeText(prompt);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
-      window.open("https://gemini.google.com/app/images", "_blank", "noopener,noreferrer");
+      window.open("https://gemini.com/images", "_blank", "noopener,noreferrer");
       toast.success("Prompt copied to clipboard! Paste it directly into the Gemini window.");
     } catch {
       toast.error("Could not copy the prompt. Select the text and open Gemini manually.");
@@ -55,7 +55,7 @@ function TryOnPage() {
               <Button type="button" className="gap-2 rounded-none bg-gradient-neon text-foreground" onClick={copyPrompt}><Copy className="size-4" /> {copied ? "Copied · Gemini opened" : "Copy prompt & open Gemini"}</Button>
             </div>
             <textarea readOnly value={prompt} aria-label="Copyable Gemini context prompt" className="mt-4 min-h-28 w-full resize-y border border-border bg-background p-3 text-xs leading-relaxed outline-none" />
-            <a href="https://gemini.google.com/app/images" target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-xs underline"><ExternalLink className="size-3.5" /> Open Gemini Images</a>
+            <a href="https://gemini.com/images" target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-xs underline"><ExternalLink className="size-3.5" /> Open Gemini Images</a>
           </section>
           <AIStudio
             product={product}

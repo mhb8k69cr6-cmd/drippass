@@ -6,7 +6,10 @@ import {
   ShoppingBag,
   User,
   Mic,
+  PanelTopOpen,
+  X,
 } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -81,6 +84,8 @@ export function SiteHeader({
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
   const [listening, setListening] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
@@ -194,6 +199,20 @@ export function SiteHeader({
         <a href="/" className="shrink-0 leading-none" aria-label="DRIPPASS home">
           <DrippassLogo variant="header" />
         </a>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="ml-auto size-9"
+          aria-label={collapsed ? "Expand navigation bar" : "Minimize navigation bar"}
+          title={collapsed ? "Expand navigation bar" : "Minimize navigation bar"}
+          onClick={() => setCollapsed((value) => !value)}
+        >
+          {collapsed ? <PanelTopOpen className="size-4" /> : <X className="size-4" />}
+        </Button>
+
+        {!collapsed && <>
 
         <button
           onClick={() => setLocationOpen(true)}
@@ -345,9 +364,10 @@ export function SiteHeader({
             </span>
           )}
         </Button>
+        </>}
       </div>
 
-      <LocationPickerDialog
+      {!collapsed && <LocationPickerDialog
         open={locationOpen}
         onOpenChange={setLocationOpen}
           {...(location ? { initialLocation: location } : {})}
@@ -355,7 +375,7 @@ export function SiteHeader({
           onLocationChange?.(selected);
           setLocationOpen(false);
         }}
-      />
+      />}
 
       <Dialog open={voiceOpen} onOpenChange={(open) => { setVoiceOpen(open); if (!open) recognitionRef.current?.stop(); }}>
         <DialogContent className="rounded-none sm:max-w-md">

@@ -36,6 +36,7 @@ const MAP_POINTS = [
 
 export function LocationPickerDialog({ open, onOpenChange, onLocationSelect, initialLocation }: Props) {
   const [input, setInput] = useState(initialLocation ?? "");
+  const [detecting, setDetecting] = useState(false);
 
   const previewLocation = useMemo(() => input.trim() || "Delhi NCR", [input]);
 
@@ -55,9 +56,10 @@ export function LocationPickerDialog({ open, onOpenChange, onLocationSelect, ini
       toast.error("Location detection is not supported in this browser.");
       return;
     }
+    setDetecting(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => setInput(`${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)}`),
-      () => toast.error("Location permission was denied. Enter a PIN code instead."),
+      (position) => { setDetecting(false); setInput(`${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)}`); toast.success("Location detected. Confirm it to update availability."); },
+      () => { setDetecting(false); toast.error("Location permission was denied. Enter a PIN code instead."); },
       { maximumAge: 300000, timeout: 5000 },
     );
   };
@@ -80,7 +82,7 @@ export function LocationPickerDialog({ open, onOpenChange, onLocationSelect, ini
               placeholder="Enter your location or PIN code"
             />
             <Button type="button" variant="outline" className="gap-2" onClick={detectLocation}>
-              <LocateFixed className="size-4" /> Detect my location
+              <LocateFixed className="size-4" /> {detecting ? "Detecting…" : "Detect my location"}
             </Button>
           </div>
 

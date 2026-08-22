@@ -176,6 +176,11 @@
   box-shadow: var(--shadow-soft);
 }
 
+@utility bg-grid-subtle {
+  background-image: linear-gradient(to right, oklch(0.25 0 0 / 0.035) 1px, transparent 1px), linear-gradient(to bottom, oklch(0.25 0 0 / 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
 @utility tracking-luxe {
   letter-spacing: 0.28em;
 }

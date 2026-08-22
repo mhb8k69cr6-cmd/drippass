@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -73,7 +73,10 @@ function Home() {
   });
   const [banner, setBanner] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [compareOpen, setCompareOpen] = useState(false);
+  const [passesExpanded, setPassesExpanded] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.localStorage.getItem("drippass.passes-collapsed") !== "true";
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -179,7 +182,7 @@ function Home() {
   const active = BANNERS[banner]!;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-grid-subtle">
       <SiteHeader
         cartCount={cart.length}
         wishlistCount={saved.length}
@@ -262,33 +265,17 @@ function Home() {
 
                 {/* Subscription strip */}
                 <section className="flex flex-wrap items-center justify-between gap-3 border border-border bg-card px-5 py-4">
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-display text-lg">Rent more, pay less with a DRIPPASS</p>
-                    <p className="text-xs text-muted-foreground">
-                      Silver 2 outfits/mo · Gold 4 outfits/mo · Unlimited VIP swaps
-                    </p>
+                    {passesExpanded && <p className="text-xs text-muted-foreground">Silver 2 outfits/mo · Gold 4 outfits/mo · Unlimited VIP swaps</p>}
                   </div>
-                  <Button variant="outline" className="rounded-none" onClick={() => setCompareOpen((open) => !open)} aria-expanded={compareOpen}>
-                    Compare passes
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" className="rounded-none" onClick={() => void navigate({ to: "/passes" })}>Compare passes</Button>
+                    <Button variant="ghost" size="icon" className="size-9" onClick={() => setPassesExpanded((expanded) => { window.localStorage.setItem("drippass.passes-collapsed", String(!expanded)); return !expanded; })} aria-label={passesExpanded ? "Minimize pass promotion" : "Expand pass promotion"}>
+                      {passesExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                    </Button>
+                  </div>
                 </section>
-
-                {compareOpen && (
-                  <section className="border border-border bg-card p-5">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="font-display text-lg">Pass comparison</p>
-                        <p className="text-xs text-muted-foreground">Membership activation requires configured billing and account services.</p>
-                      </div>
-                      <Button variant="ghost" size="sm" onClick={() => setCompareOpen(false)}>Minimize</Button>
-                    </div>
-                    <div className="mt-4 grid grid-cols-3 gap-3 text-xs">
-                      <div><p className="font-medium">Silver</p><p className="text-muted-foreground">2 outfits / month</p></div>
-                      <div><p className="font-medium">Gold</p><p className="text-muted-foreground">4 outfits / month</p></div>
-                      <div><p className="font-medium">VIP</p><p className="text-muted-foreground">Unlimited swaps</p></div>
-                    </div>
-                  </section>
-                )}
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
