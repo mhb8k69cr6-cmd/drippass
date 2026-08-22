@@ -128,3 +128,19 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Current backend status
+
+The repository currently contains a frontend catalog and server functions for the optional AI stylist and caption tools. It does not contain a database, authentication provider, payment gateway, inventory service, or waitlist API. Rental cart, account, wishlist, and pass interactions therefore remain local UI state and must not be presented as completed bookings, payments, or persistent signups.
+
+The AI stylist and caption functions use the server-only provider selected by `AI_PROVIDER`: Lovable (`LOVABLE_API_KEY`), Gemini (`GEMINI_API_KEY`), or local Ollama (`OLLAMA_BASE_URL` and `OLLAMA_MODEL`). The connector never sends keys to the browser. For local development, install Ollama, run `ollama pull llama3.2:3b`, and use `AI_PROVIDER=ollama`. Try-on image generation uses the server-only `GEMINI_API_KEY` and only runs after explicit photo consent. Persistent domain operations use Supabase through `SUPABASE_URL` and `SUPABASE_ANON_KEY`; the browser auth client uses the public `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Copy `.env.example` to a local environment file when configuring them. Apply `supabase/schema.sql` before enabling persistence.
+
+To enable Google sign-in, set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (or the legacy `VITE_SUPABASE_ANON_KEY`), enable Google under Supabase Authentication providers, and add `http://localhost:8080/` plus the deployed site URL to the Supabase redirect allow list.
+
+## Verification
+
+```sh
+npm run typecheck
+npm run lint
+npm run build
+```

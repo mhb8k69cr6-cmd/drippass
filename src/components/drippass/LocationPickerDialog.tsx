@@ -50,6 +50,18 @@ export function LocationPickerDialog({ open, onOpenChange, onLocationSelect, ini
     toast.success(`Availability checked for ${trimmed}`);
   };
 
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Location detection is not supported in this browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => setInput(`${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)}`),
+      () => toast.error("Location permission was denied. Enter a PIN code instead."),
+      { maximumAge: 300000, timeout: 5000 },
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg rounded-none">
@@ -67,8 +79,8 @@ export function LocationPickerDialog({ open, onOpenChange, onLocationSelect, ini
               onChange={(event) => setInput(event.target.value)}
               placeholder="Enter your location or PIN code"
             />
-            <Button type="button" variant="outline" className="gap-2" onClick={() => setInput("110001, Delhi")}>
-              <LocateFixed className="size-4" /> Use Delhi
+            <Button type="button" variant="outline" className="gap-2" onClick={detectLocation}>
+              <LocateFixed className="size-4" /> Detect my location
             </Button>
           </div>
 

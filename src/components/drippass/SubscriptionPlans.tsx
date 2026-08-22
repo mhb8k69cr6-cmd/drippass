@@ -34,7 +34,7 @@ export function SubscriptionPlans() {
             ))}
           </ul>
           <Button
-            onClick={() => toast.success(`${plan.name} selected — applied at checkout`)}
+               onClick={() => toast.error("Pass selection is unavailable: no membership or billing service is configured.")}
             className={`mt-6 w-full rounded-none ${plan.highlight ? "bg-gradient-neon text-foreground hover:opacity-90" : ""}`}
             variant={plan.highlight ? "default" : "outline"}
           >

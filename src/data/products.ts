@@ -9,6 +9,7 @@ import banner2 from "@/assets/banner-2.jpg";
 
 export type Product = {
   id: string;
+  slug: string;
   title: string;
   designer: string;
   image: string;
@@ -43,6 +44,7 @@ export const BRANDS = ["MAISON NOIR", "ATELIER 9", "RIOT LABEL", "VELVET CULT", 
 export const PRODUCTS: Product[] = [
   {
     id: "p1",
+    slug: "emerald-sequin-slip-dress",
     title: "Emerald Sequin Slip Dress",
     designer: "VELVET CULT",
     image: look1,
@@ -60,6 +62,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "p2",
+    slug: "oversized-moto-leather-set",
     title: "Oversized Moto Leather Set",
     designer: "RIOT LABEL",
     image: look2,
@@ -77,6 +80,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "p3",
+    slug: "ivory-three-piece-gala-tux",
     title: "Ivory Three-Piece Gala Tux",
     designer: "MAISON NOIR",
     image: look3,
@@ -94,6 +98,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "p4",
+    slug: "crimson-silk-column-gown",
     title: "Crimson Silk Column Gown",
     designer: "ATELIER 9",
     image: look4,
@@ -111,6 +116,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "p5",
+    slug: "liquid-chrome-co-ord",
     title: "Liquid Chrome Co-Ord",
     designer: "KAI STUDIO",
     image: look5,
@@ -127,6 +133,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "p6",
+    slug: "camel-trench-knit-layer",
     title: "Camel Trench & Knit Layer",
     designer: "MAISON NOIR",
     image: look6,
@@ -143,6 +150,10 @@ export const PRODUCTS: Product[] = [
     event: "Campus",
   },
 ];
+
+export function getProductBySlug(slug: string) {
+  return PRODUCTS.find((product) => product.slug === slug);
+}
 
 export const BANNERS = [
   {

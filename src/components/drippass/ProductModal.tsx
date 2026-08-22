@@ -169,7 +169,7 @@ export function ProductModal({
                 disabled={!product.available}
                 onClick={() => onAddToCart(days)}
               >
-                {product.available ? "Add to Rental Cart" : "Join Waitlist"}
+                 {product.available ? "Add to Rental Cart" : "Waitlist unavailable"}
               </Button>
               <Button variant="outline" className="gap-1.5 rounded-none" onClick={onTryOn}>
                 <Sparkles className="size-4" /> Try On

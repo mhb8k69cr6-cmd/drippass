@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Product } from "@/data/products";
 import { toast } from "sonner";
 
@@ -26,6 +27,9 @@ export function CartSheet({
   const [slot, setSlot] = useState<string>(SLOTS[0]!);
   const [code, setCode] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [cardNumber, setCardNumber] = useState("");
+  const [checkoutState, setCheckoutState] = useState<"idle" | "processing" | "success" | "declined">("idle");
 
   const rental = items.reduce((s, i) => s + i.product.perDay * i.days, 0);
   const deposit = items.reduce((s, i) => s + Math.round(i.product.retail * 0.1), 0);
@@ -138,13 +142,46 @@ export function CartSheet({
             </p>
             <Button
               className="w-full rounded-none bg-gradient-neon text-foreground hover:opacity-90"
-              onClick={() => toast.success("Checkout complete — your drip is on the way")}
+              onClick={() => setCheckoutOpen(true)}
             >
               Proceed to Checkout
             </Button>
           </div>
         )}
       </SheetContent>
+      <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
+        <DialogContent className="rounded-none sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Sandbox checkout</DialogTitle>
+            <DialogDescription>
+              This is a payment walkthrough only. No card network, payment processor, or order database is contacted.
+            </DialogDescription>
+          </DialogHeader>
+          {checkoutState === "success" ? (
+            <div className="border border-border p-4 text-sm">
+              <p className="font-medium">Sandbox payment approved</p>
+              <p className="mt-1 text-muted-foreground">No real payment was taken and no rental order was created.</p>
+            </div>
+          ) : (
+            <form
+              className="space-y-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+                setCheckoutState("processing");
+                window.setTimeout(() => setCheckoutState(cardNumber.replace(/\s/g, "").endsWith("0002") ? "declined" : "success"), 700);
+              }}
+            >
+              <div className="space-y-1"><label htmlFor="sandbox-card" className="text-xs">Card number</label><Input id="sandbox-card" required inputMode="numeric" value={cardNumber} onChange={(event) => setCardNumber(event.target.value)} placeholder="4242 4242 4242 4242" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1"><label htmlFor="sandbox-expiry" className="text-xs">Expiry</label><Input id="sandbox-expiry" required placeholder="12/30" /></div>
+                <div className="space-y-1"><label htmlFor="sandbox-cvc" className="text-xs">CVC</label><Input id="sandbox-cvc" required inputMode="numeric" placeholder="123" /></div>
+              </div>
+              {checkoutState === "declined" && <p className="text-sm text-destructive">Sandbox decline: use another test card number.</p>}
+              <DialogFooter><Button type="submit" disabled={checkoutState === "processing"} className="rounded-none bg-gradient-neon text-foreground">{checkoutState === "processing" ? "Processing…" : "Run sandbox payment"}</Button></DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </Sheet>
   );
 }

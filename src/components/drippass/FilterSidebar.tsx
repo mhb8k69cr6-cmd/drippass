@@ -14,6 +14,7 @@ export type Filters = {
   duration: string;
   brands: string[];
   maxPerDay: number;
+  availableOnly: boolean;
 };
 
 export const DEFAULT_FILTERS: Filters = {
@@ -24,6 +25,7 @@ export const DEFAULT_FILTERS: Filters = {
   duration: "7-day",
   brands: [],
   maxPerDay: 1500,
+  availableOnly: false,
 };
 
 function toggle(list: string[], value: string) {

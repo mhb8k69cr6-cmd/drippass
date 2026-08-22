@@ -1,7 +1,6 @@
-import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Sparkles, LayoutGrid, Crown, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -10,17 +9,16 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/drippass/SiteHeader";
-import { AuthDialog } from "@/components/drippass/AuthDialog";
 import { FilterSidebar, DEFAULT_FILTERS, type Filters } from "@/components/drippass/FilterSidebar";
+import { FilterBar } from "@/components/drippass/FilterBar";
 import { ProductCard } from "@/components/drippass/ProductCard";
-import { AIStudio } from "@/components/drippass/AIStudio";
 import { ProductModal } from "@/components/drippass/ProductModal";
 import { CartSheet, type CartItem } from "@/components/drippass/CartSheet";
-import { SubscriptionPlans } from "@/components/drippass/SubscriptionPlans";
 import { LookbookSheet } from "@/components/drippass/LookbookSheet";
 import { useLookbook } from "@/lib/lookbook";
 import { BANNERS, PRODUCTS, type Product } from "@/data/products";
 import { DrippassLogo } from "@/components/drippass/DrippassLogo";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -43,10 +41,22 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+function filtersFromUrl(): Filters {
+  if (typeof window === "undefined") return DEFAULT_FILTERS;
+  const params = new URLSearchParams(window.location.search);
+  return {
+    ...DEFAULT_FILTERS,
+    categories: params.getAll("category"),
+    sizes: params.getAll("size"),
+    brands: params.getAll("brand"),
+    availableOnly: params.get("availability") === "available",
+    maxPerDay: Number(params.get("maxPerDay")) || DEFAULT_FILTERS.maxPerDay,
+  };
+}
+
 function Home() {
-  const [tab, setTab] = useState("feed");
   const [category, setCategory] = useState("New Drops");
-  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState<Filters>(filtersFromUrl);
   const [sort, setSort] = useState("trending");
   const [selected, setSelected] = useState<Product | null>(PRODUCTS[0] ?? null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -56,12 +66,26 @@ function Home() {
     useLookbook();
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountTab, setAccountTab] = useState("wishlist");
-  const [authOpen, setAuthOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
-  const [location, setLocation] = useState("110001, Delhi");
+  const [location, setLocation] = useState(() => {
+    if (typeof window === "undefined") return "110001, Delhi";
+    return window.localStorage.getItem("drippass.location") ?? "110001, Delhi";
+  });
   const [banner, setBanner] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [aiStudioOpen, setAIStudioOpen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!supabase) return;
+    void supabase.auth.getSession().then(({ data }) => {
+      setUserName(data.session?.user.user_metadata["display_name"] ?? data.session?.user.email?.split("@")[0] ?? null);
+    });
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserName(session?.user.user_metadata["display_name"] ?? session?.user.email?.split("@")[0] ?? null);
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
 
   const products = useMemo(() => {
     const list = PRODUCTS.filter((p) => {
@@ -80,6 +104,7 @@ function Home() {
       if (filters.events.length && !filters.events.includes(p.event)) return false;
       if (filters.brands.length && !filters.brands.includes(p.designer)) return false;
       if (p.perDay > filters.maxPerDay) return false;
+      if (filters.availableOnly && !p.available) return false;
       return true;
     });
     if (sort === "low") return [...list].sort((a, b) => a.perDay - b.perDay);
@@ -88,9 +113,23 @@ function Home() {
     return list;
   }, [filters, sort, searchQuery]);
 
+  const updateFilters = (next: Filters) => {
+    setFilters(next);
+    const params = new URLSearchParams(window.location.search);
+    params.delete("category");
+    params.delete("size");
+    params.delete("brand");
+    next.categories.forEach((value) => params.append("category", value));
+    next.sizes.forEach((value) => params.append("size", value));
+    next.brands.forEach((value) => params.append("brand", value));
+    next.availableOnly ? params.set("availability", "available") : params.delete("availability");
+    next.maxPerDay === DEFAULT_FILTERS.maxPerDay ? params.delete("maxPerDay") : params.set("maxPerDay", String(next.maxPerDay));
+    window.history.replaceState(null, "", `${window.location.pathname}${params.toString() ? `?${params}` : ""}`);
+  };
+
   const addToCart = (product: Product, days: number) => {
     if (!product.available) {
-      toast("Added to waitlist — we'll ping you when it returns");
+      toast.error("Waitlist is unavailable: no persistence service is configured.");
       return;
     }
     setCart((c) => (c.some((i) => i.product.id === product.id) ? c : [...c, { product, days }]));
@@ -121,18 +160,12 @@ function Home() {
     setAccountOpen(true);
   };
 
-  const openAuth = () => setAuthOpen(true);
+  const openAuth = () => void navigate({ to: "/login" });
 
   const logout = () => {
+    void supabase?.auth.signOut();
     setUserName(null);
     toast.success("You have been logged out");
-  };
-
-  const signUp = (name: string) => {
-    setUserName(name);
-    setAuthOpen(false);
-    toast.success(`Welcome, ${name}!`);
-    openAccount("wishlist");
   };
 
   const openManagePass = () => {
@@ -153,8 +186,7 @@ function Home() {
         activeCategory={category}
         onCategory={(c) => {
           setCategory(c);
-          if (c === "Subscription Plans") setTab("plans");
-          else setTab("feed");
+          if (c !== "Subscription Plans") updateFilters({ ...filters, categories: [c] });
         }}
         onOpenCart={() => setCartOpen(true)}
         onOpenWishlist={() => {
@@ -167,7 +199,6 @@ function Home() {
         }}
         onSearch={(query) => {
           setSearchQuery(query);
-          setTab("feed");
         }}
         onLogin={userName ? logout : openAuth}
         location={location}
@@ -180,61 +211,14 @@ function Home() {
           if (userName) openReturnPickups();
           else openAuth();
         }}
-        userName={userName ?? undefined}
+        {...(userName ? { userName } : {})}
       />
 
       <main className="mx-auto max-w-[1600px] px-4 py-5">
-        <Tabs value={tab} onValueChange={setTab}>
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <TabsList className="rounded-none bg-muted p-1">
-              <TabsTrigger value="feed" className="gap-1.5 rounded-none text-xs">
-                <LayoutGrid className="size-3.5" /> Browsing Feed
-              </TabsTrigger>
-              <TabsTrigger value="plans" className="gap-1.5 rounded-none text-xs">
-                <Crown className="size-3.5" /> Subscription Plans
-              </TabsTrigger>
-              <TabsTrigger value="studio" className="gap-1.5 rounded-none text-xs">
-                <Sparkles className="size-3.5" /> AI Try-On Studio
-              </TabsTrigger>
-            </TabsList>
-
-            <div className="flex items-center gap-2">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1.5 rounded-none lg:hidden">
-                    <SlidersHorizontal className="size-3.5" /> Filters
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-80 overflow-y-auto p-6">
-                  <SheetTitle className="sr-only">Filters</SheetTitle>
-                  <FilterSidebar filters={filters} onChange={setFilters} />
-                </SheetContent>
-              </Sheet>
-              <Select value={sort} onValueChange={setSort}>
-                <SelectTrigger className="h-9 w-44 rounded-none text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="trending">Sort: Trending</SelectItem>
-                  <SelectItem value="low">Price: Low to High</SelectItem>
-                  <SelectItem value="high">Price: High to Low</SelectItem>
-                  <SelectItem value="rating">Top Rated</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div
-            className={`grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] ${
-              aiStudioOpen ? 'xl:grid-cols-[220px_minmax(0,1fr)_360px]' : 'xl:grid-cols-[220px_minmax(0,1fr)]'
-            }`}
-          >
-            <div className="hidden lg:block">
-              <FilterSidebar filters={filters} onChange={setFilters} />
-            </div>
-
+        <div>
+          <div className="grid gap-6">
             <div className="min-w-0">
-              <TabsContent value="feed" className="mt-0 space-y-6">
+              <section className="mt-0 space-y-6">
                 {/* Banner carousel */}
                 <section className="relative overflow-hidden border border-border">
                   <img
@@ -284,10 +268,53 @@ function Home() {
                       Silver 2 outfits/mo · Gold 4 outfits/mo · Unlimited VIP swaps
                     </p>
                   </div>
-                  <Button variant="outline" className="rounded-none" onClick={() => setTab("plans")}>
+                  <Button variant="outline" className="rounded-none" onClick={() => setCompareOpen((open) => !open)} aria-expanded={compareOpen}>
                     Compare passes
                   </Button>
                 </section>
+
+                {compareOpen && (
+                  <section className="border border-border bg-card p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="font-display text-lg">Pass comparison</p>
+                        <p className="text-xs text-muted-foreground">Membership activation requires configured billing and account services.</p>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => setCompareOpen(false)}>Minimize</Button>
+                    </div>
+                    <div className="mt-4 grid grid-cols-3 gap-3 text-xs">
+                      <div><p className="font-medium">Silver</p><p className="text-muted-foreground">2 outfits / month</p></div>
+                      <div><p className="font-medium">Gold</p><p className="text-muted-foreground">4 outfits / month</p></div>
+                      <div><p className="font-medium">VIP</p><p className="text-muted-foreground">Unlimited swaps</p></div>
+                    </div>
+                  </section>
+                )}
+
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button variant="outline" size="sm" className="gap-1.5 rounded-none lg:hidden">
+                          <SlidersHorizontal className="size-3.5" /> Filters
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent side="left" className="w-80 overflow-y-auto p-6">
+                        <SheetTitle className="sr-only">Filters</SheetTitle>
+                        <FilterSidebar filters={filters} onChange={updateFilters} />
+                      </SheetContent>
+                    </Sheet>
+                    <Select value={sort} onValueChange={setSort}>
+                      <SelectTrigger className="h-9 w-44 rounded-none text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="trending">Sort: Trending</SelectItem>
+                        <SelectItem value="low">Price: Low to High</SelectItem>
+                        <SelectItem value="high">Price: High to Low</SelectItem>
+                        <SelectItem value="rating">Top Rated</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <FilterBar filters={filters} onChange={updateFilters} />
+                </div>
 
                 <div className="flex items-center justify-between">
                   <h2 className="font-display text-xl">
@@ -309,9 +336,9 @@ function Home() {
                         setSelected(p);
                         setModalOpen(true);
                       }}
+                      href={`/rent/${p.slug}`}
                       onTryOn={() => {
                         setSelected(p);
-                        setTab("studio");
                       }}
                     />
                   ))}
@@ -323,54 +350,10 @@ function Home() {
                       : "No fits match these filters. Loosen them up."}
                   </p>
                 )}
-              </TabsContent>
-
-              <TabsContent value="plans" className="mt-0 space-y-6">
-                <div>
-                  <h2 className="font-display text-3xl">Subscription Passes</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Cancel anytime. Deposits waived on Gold and above.
-                  </p>
-                </div>
-                <SubscriptionPlans />
-              </TabsContent>
-
-              <TabsContent value="studio" className="mt-0 xl:hidden">
-                <AIStudio
-                  product={selected}
-                  onRent={() => selected && addToCart(selected, 7)}
-                  onSave={(look) => selected && handleSaveLook(selected, look)}
-                  onShare={() => openAccount("lookbook")}
-                  onOpenChange={setAIStudioOpen}
-                />
-              </TabsContent>
-
-              <TabsContent value="studio" className="mt-0 hidden xl:block">
-                <div className="grid gap-4 border border-border bg-card p-8">
-                  <h2 className="font-display text-2xl">AI Fitting Room is live on the right →</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Selected fit: {selected ? `${selected.title} — ${selected.designer}` : "none yet"}. Upload a
-                    full-body photo in the studio panel to render your preview, then ask the stylist anything.
-                  </p>
-                  <Button className="w-fit rounded-none" variant="outline" onClick={() => setTab("feed")}>
-                    Back to feed
-                  </Button>
-                </div>
-              </TabsContent>
-            </div>
-
-            <div className="hidden xl:block">
-              <div className="sticky top-[152px] h-[calc(100vh-176px)]">
-                <AIStudio
-                  product={selected}
-                  onRent={() => selected && addToCart(selected, 7)}
-                  onSave={(look) => selected && handleSaveLook(selected, look)}
-                  onShare={() => openAccount("lookbook")}
-                />
-              </div>
+              </section>
             </div>
           </div>
-        </Tabs>
+        </div>
       </main>
 
       <footer className="mt-10 border-t border-border bg-card">
@@ -387,7 +370,6 @@ function Home() {
         onAddToCart={(days) => selected && addToCart(selected, days)}
         onTryOn={() => {
           setModalOpen(false);
-          setTab("studio");
         }}
       />
       <CartSheet
@@ -396,7 +378,6 @@ function Home() {
         items={cart}
         onRemove={(id) => setCart((c) => c.filter((i) => i.product.id !== id))}
       />
-      <AuthDialog open={authOpen} onOpenChange={setAuthOpen} onSignUp={signUp} />
       <LookbookSheet
         open={accountOpen}
         onOpenChange={setAccountOpen}
