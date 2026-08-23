@@ -142,9 +142,9 @@ export function AIStudio({
       link.click();
       URL.revokeObjectURL(link.href);
       await navigator.clipboard.writeText(prompt);
-      window.open("https://gemini.google.com/images", "_blank", "noopener,noreferrer");
+      window.open("https://chatgpt.com/images", "_blank", "noopener,noreferrer");
       setCopied(true);
-      toast.success("ZIP file downloaded & prompt copied! Open Gemini, upload '1_person_photo' and '2_garment_photo', then paste (Ctrl+V) the prompt.");
+      toast.success("ZIP file downloaded & prompt copied! Open ChatGPT Images, upload '1_person_photo' and '2_garment_photo', then paste (Ctrl+V) the prompt.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Try-on generation failed.");
     } finally {
@@ -261,15 +261,15 @@ export function AIStudio({
 
           <div className="mt-3 space-y-3">
             <div className="border border-border bg-background p-3">
-              <div className="flex items-center justify-between gap-2"><p className="text-[10px] tracking-luxe text-muted-foreground">GEMINI HANDOFF</p><Button type="button" variant="outline" size="sm" className="h-8 gap-1 rounded-none text-[10px]" disabled={!consent || !activeProduct} onClick={copyPrompt}><Copy className="size-3" /> {copied ? "Copied" : "Copy prompt"}</Button></div>
+              <div className="flex items-center justify-between gap-2"><p className="text-[10px] tracking-luxe text-muted-foreground">CHATGPT IMAGES</p><Button type="button" variant="outline" size="sm" className="h-8 gap-1 rounded-none text-[10px]" disabled={!consent || !activeProduct} onClick={copyPrompt}><Copy className="size-3" /> {copied ? "Copied" : "Copy prompt"}</Button></div>
               <p className="mt-2 line-clamp-3 text-[11px] leading-relaxed text-muted-foreground">{prompt}</p>
             </div>
             <div className="flex items-start gap-2 border border-border p-3">
               <Checkbox id="try-on-consent" checked={consent} onCheckedChange={(checked) => setConsent(checked === true)} />
-              <Label htmlFor="try-on-consent" className="text-[11px] font-normal leading-relaxed">I consent to this photo being sent to the configured Gemini service for one try-on generation.</Label>
+              <Label htmlFor="try-on-consent" className="text-[11px] font-normal leading-relaxed">I consent to this photo being used for one try-on generation in ChatGPT Images.</Label>
             </div>
             <Button type="button" onClick={runTryOn} disabled={!userPhoto || !activeProduct || !consent || generating} className="w-full rounded-none bg-gradient-neon text-foreground">
-              {generating ? "Preparing Gemini…" : copied ? "Prompt copied · Gemini opened" : "Generate try-on"}
+              {generating ? "Preparing ChatGPT Images…" : copied ? "Prompt copied · ChatGPT Images opened" : "Generate try-on"}
             </Button>
           </div>
         </section>
