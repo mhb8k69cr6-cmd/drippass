@@ -20,6 +20,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { askStylist } from "@/lib/stylist.functions";
+import { currentAccessToken } from "@/lib/pass-client";
+import { consumePassFeatureForToken as consume } from "@/lib/pass.functions";
 import { PRODUCTS, type Product } from "@/data/products";
 import { buildTryOnPrompt } from "@/lib/try-on-prompt";
 import { toast } from "sonner";
@@ -31,37 +33,6 @@ const QUICK_PROMPTS = [
   "Is this formal enough for a university gala?",
   "Suggest accessories under ₹2000",
 ];
-
-function crc32(bytes: Uint8Array) {
-  let crc = 0xffffffff;
-  for (const byte of bytes) {
-    crc ^= byte;
-    for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
-  }
-  return (crc ^ 0xffffffff) >>> 0;
-}
-
-function zipFiles(files: Array<{ name: string; bytes: Uint8Array }>) {
-  const encoder = new TextEncoder();
-  const locals: Uint8Array[] = [];
-  const central: Uint8Array[] = [];
-  let offset = 0;
-  for (const file of files) {
-    const name = encoder.encode(file.name);
-    const local = new Uint8Array(30 + name.length + file.bytes.length);
-    const view = new DataView(local.buffer);
-    view.setUint32(0, 0x04034b50, true); view.setUint16(4, 20, true); view.setUint16(8, 0, true);
-    view.setUint32(14, crc32(file.bytes), true); view.setUint32(18, file.bytes.length, true); view.setUint32(22, file.bytes.length, true); view.setUint16(26, name.length, true);
-    local.set(name, 30); local.set(file.bytes, 30 + name.length); locals.push(local);
-    const entry = new Uint8Array(46 + name.length); const entryView = new DataView(entry.buffer);
-    entryView.setUint32(0, 0x02014b50, true); entryView.setUint16(4, 20, true); entryView.setUint16(6, 20, true); entryView.setUint32(16, crc32(file.bytes), true); entryView.setUint32(20, file.bytes.length, true); entryView.setUint32(24, file.bytes.length, true); entryView.setUint16(28, name.length, true); entryView.setUint32(42, offset, true); entry.set(name, 46); central.push(entry);
-    offset += local.length;
-  }
-  const centralBytes = central.reduce((total, item) => total + item.length, 0);
-  const end = new Uint8Array(22); const endView = new DataView(end.buffer);
-  endView.setUint32(0, 0x06054b50, true); endView.setUint16(8, files.length, true); endView.setUint16(10, files.length, true); endView.setUint32(12, centralBytes, true); endView.setUint32(16, offset, true);
-  return new Blob([...locals, ...central, end], { type: "application/zip" });
-}
 
 export function AIStudio({
   product,
@@ -108,10 +79,14 @@ export function AIStudio({
     setInput("");
     setPending(true);
     try {
+      const accessToken = await currentAccessToken();
+      if (!accessToken) throw new Error("Log in to use the AI Stylist and receive your Free Pass allowance.");
       const res = await send({
         data: {
           question,
           outfit: activeProduct ? `${activeProduct.title} by ${activeProduct.designer} (${activeProduct.category})` : undefined,
+          accessToken,
+          idempotencyKey: crypto.randomUUID(),
         },
       });
       setMessages((m) => [...m, { role: "assistant", text: res.reply }]);
@@ -126,6 +101,7 @@ export function AIStudio({
 
   const runTryOn = async () => {
     if (!userPhoto || !activeProduct || !consent || generating) return;
+    const chatgptWindow = window.open("about:blank", "_blank");
     setGenerating(true);
     try {
       const personBlob = await fetch(userPhoto).then((response) => response.blob());
@@ -133,19 +109,34 @@ export function AIStudio({
         if (!response.ok) throw new Error("The garment image could not be downloaded.");
         return response.blob();
       });
-      const personBytes = new Uint8Array(await personBlob.arrayBuffer());
-      const garmentBytes = new Uint8Array(await garmentBlob.arrayBuffer());
-      const archive = zipFiles([{ name: "1_person_photo.jpg", bytes: personBytes }, { name: "2_garment_photo.jpg", bytes: garmentBytes }]);
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(archive);
-      link.download = "drippass_tryon_assets.zip";
-      link.click();
-      URL.revokeObjectURL(link.href);
       await navigator.clipboard.writeText(prompt);
-      window.open("https://chatgpt.com/images", "_blank", "noopener,noreferrer");
+      const accessToken = await currentAccessToken();
+      if (!accessToken) throw new Error("Log in to use AI Try-On and receive your Free Pass allowance.");
+      const usage = await consume(accessToken, "AI_TRY_ON", crypto.randomUUID());
+      if (!usage.allowed) {
+        chatgptWindow?.close();
+        toast.error("Your free AI Try-On has been used. Explore Passes to continue.");
+        return;
+      }
+      const download = (blob: Blob, filename: string) => {
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      };
+      download(personBlob, "drippass_person_photo.jpg");
+      download(garmentBlob, "drippass_garment_photo.jpg");
+      if (chatgptWindow) {
+        chatgptWindow.location.href = "https://chatgpt.com/images";
+      } else {
+        toast.info("Your browser blocked the new tab. Open ChatGPT Images manually to continue.");
+      }
       setCopied(true);
-      toast.success("ZIP file downloaded & prompt copied! Open ChatGPT Images, upload '1_person_photo' and '2_garment_photo', then paste (Ctrl+V) the prompt.");
+      toast.success("Both images downloaded and prompt copied. Upload them to ChatGPT Images, then paste the prompt.");
     } catch (error) {
+      chatgptWindow?.close();
       toast.error(error instanceof Error ? error.message : "Try-on generation failed.");
     } finally {
       setGenerating(false);
@@ -160,9 +151,6 @@ export function AIStudio({
 
   const saveCurrentLook = () => {
     if (!activeProduct) return;
-    const savedLooks = JSON.parse(window.localStorage.getItem("drippass.lookbook") ?? "[]") as Array<{ productId: string; createdAt: number }>;
-    savedLooks.unshift({ productId: activeProduct.id, createdAt: Date.now() });
-    window.localStorage.setItem("drippass.lookbook", JSON.stringify(savedLooks));
     setSaved(true);
     toast.success("Look saved to your account!");
   };
@@ -242,7 +230,7 @@ export function AIStudio({
 
         {/* Step 2 */}
         <section>
-          <p className="mb-2 text-[10px] tracking-luxe text-muted-foreground">STEP 2 — INSTANT FIT PREVIEW</p>
+          <p className="mb-2 text-[10px] tracking-luxe text-muted-foreground">STEP 2 — INSTANT FIT PREVIEW · FREE PASS ACCESS</p>
           <div className="relative aspect-[3/4] overflow-hidden border border-border bg-muted">
             {userPhoto ? (
               <img src={userPhoto} alt="Your uploaded try-on photo" className="h-full w-full object-cover" />
@@ -278,7 +266,7 @@ export function AIStudio({
 
         {/* Step 3 */}
         <section>
-          <p className="mb-2 text-[10px] tracking-luxe text-muted-foreground">STEP 3 — ASK AI STYLIST</p>
+          <p className="mb-2 text-[10px] tracking-luxe text-muted-foreground">STEP 3 — ASK AI STYLIST · 1 FREE SESSION</p>
           <div className="space-y-3">
             {messages.map((m, i) => (
               <div

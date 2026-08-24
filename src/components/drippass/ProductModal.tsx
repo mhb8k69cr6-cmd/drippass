@@ -21,7 +21,7 @@ export function ProductModal({
   product: Product | null;
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  onAddToCart: (days: number) => void;
+  onAddToCart: (days: number, size: string) => void;
   onTryOn: () => void;
 }) {
   const [active, setActive] = useState(0);
@@ -87,6 +87,9 @@ export function ProductModal({
               <p className="font-display text-3xl">
                 ₹{product.perDay}
                 <span className="font-sans text-sm text-muted-foreground"> / day</span>
+              </p>
+              <p className={`mt-1 text-xs ${product.rentalStatus === "AVAILABLE" ? "text-emerald-600" : "text-muted-foreground"}`}>
+                {product.rentalStatus === "AVAILABLE" ? "Available to reserve" : product.rentalStatus === "RESERVED" ? "Currently Reserved" : "Not Available for Rent"}
               </p>
             </div>
 
@@ -166,10 +169,10 @@ export function ProductModal({
             <div className="flex gap-2">
               <Button
                 className="flex-1 rounded-none bg-gradient-neon text-foreground hover:opacity-90"
-                disabled={!product.available}
-                onClick={() => onAddToCart(days)}
+                  disabled={!product.available || !size}
+                onClick={() => size && onAddToCart(days, size)}
               >
-                 {product.available ? "Add to Rental Cart" : "Waitlist unavailable"}
+                   {product.available ? (size ? "Add to Rental Cart" : "Select a size") : "Waitlist unavailable"}
               </Button>
               <Button variant="outline" className="gap-1.5 rounded-none" onClick={onTryOn}>
                 <Sparkles className="size-4" /> Try On

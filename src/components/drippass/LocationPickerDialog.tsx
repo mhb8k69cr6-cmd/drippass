@@ -58,7 +58,7 @@ export function LocationPickerDialog({ open, onOpenChange, onLocationSelect, ini
     }
     setDetecting(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => { setDetecting(false); setInput(`${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)}`); toast.success("Location detected. Confirm it to update availability."); },
+      () => { setDetecting(false); setInput("Delhi NCR"); toast.success("Approximate area detected. Confirm it before saving."); },
       () => { setDetecting(false); toast.error("Location permission was denied. Enter a PIN code instead."); },
       { maximumAge: 300000, timeout: 5000 },
     );

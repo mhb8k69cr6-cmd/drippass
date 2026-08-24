@@ -1,8 +1,8 @@
-import { i as __toESM, t as __commonJSMin } from "../../_runtime.mjs";
+import { i as __toESM, n as __exportAll, t as __commonJSMin } from "../../_runtime.mjs";
 import { t as FunctionsClient } from "../supabase__functions-js.mjs";
 import { t as PostgrestClient } from "../supabase__postgrest-js.mjs";
 import { t as RealtimeClient } from "../supabase__realtime-js.mjs";
-import { t as AuthClient } from "../supabase__auth-js.mjs";
+import { S as isAuthSessionMissingError, _ as isAuthApiError, a as AuthImplicitGrantRedirectError, b as isAuthRefreshDiscardedError, c as AuthInvalidTokenResponseError, d as AuthRefreshDiscardedError, f as AuthRetryableFetchError, g as CustomAuthError, h as AuthWeakPasswordError, i as AuthError, l as AuthPKCECodeVerifierMissingError, m as AuthUnknownError, n as SIGN_OUT_SCOPES, o as AuthInvalidCredentialsError, p as AuthSessionMissingError, r as AuthApiError, s as AuthInvalidJwtError, t as AuthClient, u as AuthPKCEGrantCodeExchangeError, v as isAuthError, x as isAuthRetryableFetchError, y as isAuthImplicitGrantRedirectError } from "../supabase__auth-js.mjs";
 //#region node_modules/@supabase/supabase-js/dist/tracingRegistry.mjs
 var EXTRACTOR_KEY = Symbol.for("@supabase/supabase-js.traceContextExtractor");
 /**
@@ -3503,6 +3503,31 @@ var StorageClient = class extends StorageBucketApi {
 };
 //#endregion
 //#region node_modules/@supabase/supabase-js/dist/index.mjs
+var dist_exports = /* @__PURE__ */ __exportAll({
+	AuthApiError: () => AuthApiError,
+	AuthError: () => AuthError,
+	AuthImplicitGrantRedirectError: () => AuthImplicitGrantRedirectError,
+	AuthInvalidCredentialsError: () => AuthInvalidCredentialsError,
+	AuthInvalidJwtError: () => AuthInvalidJwtError,
+	AuthInvalidTokenResponseError: () => AuthInvalidTokenResponseError,
+	AuthPKCECodeVerifierMissingError: () => AuthPKCECodeVerifierMissingError,
+	AuthPKCEGrantCodeExchangeError: () => AuthPKCEGrantCodeExchangeError,
+	AuthRefreshDiscardedError: () => AuthRefreshDiscardedError,
+	AuthRetryableFetchError: () => AuthRetryableFetchError,
+	AuthSessionMissingError: () => AuthSessionMissingError,
+	AuthUnknownError: () => AuthUnknownError,
+	AuthWeakPasswordError: () => AuthWeakPasswordError,
+	CustomAuthError: () => CustomAuthError,
+	SIGN_OUT_SCOPES: () => SIGN_OUT_SCOPES,
+	SupabaseClient: () => SupabaseClient,
+	createClient: () => createClient,
+	isAuthApiError: () => isAuthApiError,
+	isAuthError: () => isAuthError,
+	isAuthImplicitGrantRedirectError: () => isAuthImplicitGrantRedirectError,
+	isAuthRefreshDiscardedError: () => isAuthRefreshDiscardedError,
+	isAuthRetryableFetchError: () => isAuthRetryableFetchError,
+	isAuthSessionMissingError: () => isAuthSessionMissingError
+});
 var version = "2.112.3";
 var JS_ENV = "";
 var JS_RUNTIME_VERSION;
@@ -5178,4 +5203,4 @@ function createBrowserClient(supabaseUrl, supabaseKey, options) {
 	return client;
 }
 //#endregion
-export { createBrowserClient as t };
+export { dist_exports as n, createBrowserClient as t };

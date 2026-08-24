@@ -1,0 +1,9 @@
+DESCRIPTION: A glamorous emerald-green sequin mini dress featuring a fitted silhouette, delicate spaghetti straps, a flattering V-neckline, and an asymmetric fringed hem. Perfect for parties, evening events, and statement occasions.
+SIZES: S, M, L, XL
+CATEGORY: Dresses
+COLOR: Emerald green
+MATERIAL: Polyester Sequin
+STOCK: IN STOCK
+SKU: DRS-003
+TAGS: sequin, partywear, evening, glamorous
+FEATURED: FALSE

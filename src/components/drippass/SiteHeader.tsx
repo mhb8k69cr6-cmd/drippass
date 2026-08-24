@@ -98,16 +98,6 @@ export function SiteHeader({
     if (location) window.localStorage.setItem("drippass.location", location);
   }, [location]);
 
-  useEffect(() => {
-    if (sessionStorage.getItem("drippass-location-requested") || !navigator.geolocation) return;
-    sessionStorage.setItem("drippass-location-requested", "true");
-    navigator.geolocation.getCurrentPosition(
-      (position) => onLocationChange?.(`${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)}`),
-      () => undefined,
-      { maximumAge: 300000, timeout: 5000 },
-    );
-  }, [onLocationChange]);
-
   useEffect(() => () => recognitionRef.current?.stop(), []);
   useEffect(() => {
     const timer = window.setInterval(() => setPlaceholderIndex((index) => (index + 1) % PLACEHOLDERS.length), 3200);

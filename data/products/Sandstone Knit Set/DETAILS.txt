@@ -1,0 +1,9 @@
+DESCRIPTION: A refined neutral ensemble featuring a ribbed turtleneck knit and matching wide-leg cropped trousers, layered beneath a long double-breasted coat for an effortlessly polished look.
+SIZES: S, M, L, XL
+CATEGORY: Co-Ord Sets
+COLOR: Beige, Taupe
+MATERIAL: Wool-Polyester Blend
+STOCK: IN STOCK
+SKU: CRS-002
+TAGS: neutral, knitwear, co-ord, winter
+FEATURED: FALSE

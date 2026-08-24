@@ -1,0 +1,9 @@
+DESCRIPTION: Turn heads in this high-shine silver jumpsuit featuring a deep V neckline, belted waist, asymmetrical short-and-full-length pant design, and matching heeled boot styling for a bold party-ready look.
+SIZES: S, M, L, XL
+CATEGORY: Jumpsuits
+COLOR: Metallic Silver
+MATERIAL: Polyester-Spandex Blend
+STOCK: IN STOCK
+SKU: JMP-001
+TAGS: metallic, partywear, statement, new-arrival
+FEATURED: FALSE

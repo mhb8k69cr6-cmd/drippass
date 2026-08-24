@@ -1,13 +1,54 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Check, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PLANS } from "@/data/products";
-import { toast } from "sonner";
+import { PASS_PLANS, type PassState, getPassState } from "@/lib/pass.functions";
+import { currentAccessToken } from "@/lib/pass-client";
 
 export function SubscriptionPlans() {
+  const [pass, setPass] = useState<PassState | null>(null);
+  const loadPass = useServerFn(getPassState);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let active = true;
+    void currentAccessToken().then((accessToken) => {
+      if (!accessToken) return;
+      return loadPass({ data: { accessToken } }).then((state) => {
+        if (active) setPass(state);
+      });
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, [loadPass]);
+
+  const choose = async (planId: string) => {
+    if (planId === "FREE") {
+      if (pass?.planId === "FREE") return;
+      await navigate({ to: "/signup" });
+      return;
+    }
+    await navigate({ to: "/checkout/membership/$plan", params: { plan: planId.toLowerCase() } });
+  };
+
   return (
-    <section className="grid gap-4 md:grid-cols-3">
-      {PLANS.map((plan) => (
+    <>
+      {pass && (
+        <section className="mb-6 border border-border bg-card p-5 shadow-soft">
+          <p className="text-[10px] tracking-luxe text-muted-foreground">YOUR DRIPPASS</p>
+          <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+            <div><h2 className="font-display text-3xl">{PASS_PLANS.find((plan) => plan.id === pass.planId)?.name}</h2><p className="mt-1 text-sm text-muted-foreground">{pass.planId === "FREE" ? "₹0 · lifetime introductory access" : "Active pass"}</p></div>
+            <div className="grid grid-cols-3 gap-4 text-xs">
+              <div><p className="text-muted-foreground">AI Try-On</p><p className="mt-1 font-medium">{pass.aiTryOnUses < 0 ? "Unlimited" : `${pass.aiTryOnUses} remaining`}</p></div>
+              <div><p className="text-muted-foreground">AI Stylist</p><p className="mt-1 font-medium">{pass.aiStylistUses < 0 ? "Unlimited" : `${pass.aiStylistUses} remaining`}</p></div>
+              <div><p className="text-muted-foreground">Rental credits</p><p className="mt-1 font-medium">{pass.unlimitedSwaps ? "Unlimited" : pass.rentalCredits}</p></div>
+            </div>
+          </div>
+        </section>
+      )}
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {PASS_PLANS.map((plan) => (
         <div
           key={plan.name}
           className={`flex flex-col border p-6 ${
@@ -34,14 +75,16 @@ export function SubscriptionPlans() {
             ))}
           </ul>
           <Button
-               onClick={() => toast.error("Pass selection is unavailable: no membership or billing service is configured.")}
+            onClick={() => void choose(plan.id)}
+            disabled={pass?.planId === plan.id}
             className={`mt-6 w-full rounded-none ${plan.highlight ? "bg-gradient-neon text-foreground hover:opacity-90" : ""}`}
             variant={plan.highlight ? "default" : "outline"}
           >
-            Choose {plan.name}
+            {pass?.planId === plan.id ? "Current Pass" : plan.id === "FREE" ? "Start Free" : `Choose ${plan.name}`}
           </Button>
         </div>
       ))}
-    </section>
+      </section>
+    </>
   );
 }

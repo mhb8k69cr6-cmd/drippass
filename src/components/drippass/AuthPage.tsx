@@ -34,7 +34,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
       return;
     }
     if (isSignup && !result.data.session) {
-      setMessage("Account created. Check your email to confirm access.");
+      setMessage("Account created with a Free Pass. Check your email to confirm access.");
       return;
     }
     await navigate({ to: "/" });

@@ -1,0 +1,9 @@
+DESCRIPTION: A bold all-black look centered around a classic oversized biker jacket with asymmetric zip detailing, paired with relaxed cargo pants for an effortlessly edgy streetwear aesthetic.
+SIZES: S, M, L, XL
+CATEGORY: Outerwear
+COLOR: Black
+MATERIAL: Faux Leather
+STOCK: IN STOCK
+SKU: OUT-003
+TAGS: biker, streetwear, edgy, new-arrival
+FEATURED: FALSE

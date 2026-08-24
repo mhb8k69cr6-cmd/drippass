@@ -41,12 +41,17 @@ function isErrorLike(value) {
 }
 var originalConsoleError = console.error.bind(console);
 console.error = (...args) => {
-	originalConsoleError(...args.map((arg) => {
+	const expanded = args.map((arg) => {
 		if (!isErrorLike(arg)) return arg;
 		record(arg);
 		return describeError(arg);
-	}));
+	});
+	if (expanded.some((arg) => typeof arg === "string" && isAbortedMessage(arg))) return;
+	originalConsoleError(...expanded);
 };
+function isAbortedMessage(message) {
+	return /(?:^|\n)(?:Error: )?aborted(?:\n|$)/i.test(message) || message.includes("ECONNRESET");
+}
 if (typeof globalThis.addEventListener === "function") {
 	globalThis.addEventListener("error", (event) => record(event.error ?? event));
 	globalThis.addEventListener("unhandledrejection", (event) => record(event.reason));
@@ -93,7 +98,7 @@ function renderErrorPage() {
 }
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./server-Bk9SKquM.mjs").then((n) => n.t).then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./server-Bne-Pueh.mjs").then((n) => n.i).then((n) => n.t).then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
 async function normalizeCatastrophicSsrResponse(response) {
@@ -101,11 +106,18 @@ async function normalizeCatastrophicSsrResponse(response) {
 	if (!(response.headers.get("content-type") ?? "").includes("application/json")) return response;
 	const body = await response.clone().text();
 	if (!isH3SwallowedErrorBody(body)) return response;
-	console.error(consumeLastCapturedError() ?? /* @__PURE__ */ new Error(`h3 swallowed SSR error: ${body}`));
+	const error = consumeLastCapturedError();
+	if (isRequestAbortedError(error)) return new Response(null, { status: 499 });
+	console.error(error ?? /* @__PURE__ */ new Error(`h3 swallowed SSR error: ${body}`));
 	return new Response(renderErrorPage(), {
 		status: 500,
 		headers: { "content-type": "text/html; charset=utf-8" }
 	});
+}
+function isRequestAbortedError(error) {
+	if (!(error instanceof Error)) return false;
+	const code = error.code;
+	return error.name === "AbortError" || code === "ECONNRESET" || error.message.toLowerCase() === "aborted";
 }
 function isH3SwallowedErrorBody(body) {
 	try {
@@ -119,6 +131,7 @@ var server_default = { async fetch(request, env, ctx) {
 	try {
 		return await normalizeCatastrophicSsrResponse(await (await getServerEntry()).fetch(request, env, ctx));
 	} catch (error) {
+		if (isRequestAbortedError(error)) return new Response(null, { status: 499 });
 		console.error(error);
 		return new Response(renderErrorPage(), {
 			status: 500,

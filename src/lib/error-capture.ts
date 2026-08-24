@@ -59,8 +59,13 @@ console.error = (...args: unknown[]) => {
     record(arg);
     return describeError(arg);
   });
+  if (expanded.some((arg) => typeof arg === "string" && isAbortedMessage(arg))) return;
   originalConsoleError(...expanded);
 };
+
+function isAbortedMessage(message: string): boolean {
+  return /(?:^|\n)(?:Error: )?aborted(?:\n|$)/i.test(message) || message.includes("ECONNRESET");
+}
 
 if (typeof globalThis.addEventListener === "function") {
   globalThis.addEventListener("error", (event) => record((event as ErrorEvent).error ?? event));

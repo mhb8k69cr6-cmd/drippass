@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/try-on")({
-  validateSearch: (search) => ({ product: typeof search.product === "string" ? search.product : undefined }),
+  validateSearch: (search) => ({ product: typeof search["product"] === "string" ? search["product"] : undefined }),
   head: () => ({
     meta: [
       { title: "AI Try-On Studio | DRIPPASS" },

@@ -1,0 +1,9 @@
+DESCRIPTION: A refined ivory three-piece tuxedo featuring striking burnt-orange satin lapels, a matching waistcoat, pocket square, and classic black bow tie. Tailored for a sharp, elegant silhouette ideal for weddings, galas, and formal celebrations.
+SIZES: S, M, L, XL
+CATEGORY: Suits & Blazers
+COLOR: Ivory, Burnt Orange, Black
+MATERIAL: Polyester-Viscose Blend
+STOCK: IN STOCK
+SKU: SUT-001
+TAGS: formalwear, tuxedo, wedding, eveningwear
+FEATURED: FALSE

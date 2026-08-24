@@ -7,9 +7,12 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Product } from "@/data/products";
+import { createSandboxOrder } from "@/lib/domain.functions";
+import { currentAccessToken } from "@/lib/pass-client";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 
-export type CartItem = { product: Product; days: number };
+export type CartItem = { product: Product; days: number; size: string };
 
 const SLOTS = ["Tomorrow · 9AM–12PM", "Tomorrow · 4PM–8PM", "Sat · 9AM–12PM", "Sat · 6PM–10PM"];
 
@@ -30,6 +33,7 @@ export function CartSheet({
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [cardNumber, setCardNumber] = useState("");
   const [checkoutState, setCheckoutState] = useState<"idle" | "processing" | "success" | "declined">("idle");
+  const createOrder = useServerFn(createSandboxOrder);
 
   const rental = items.reduce((s, i) => s + i.product.perDay * i.days, 0);
   const deposit = items.reduce((s, i) => s + Math.round(i.product.retail * 0.1), 0);
@@ -154,13 +158,13 @@ export function CartSheet({
           <DialogHeader>
             <DialogTitle>Sandbox checkout</DialogTitle>
             <DialogDescription>
-              This is a payment walkthrough only. No card network, payment processor, or order database is contacted.
+              This is a mock payment walkthrough. No real payment is processed; a successful test creates a rental order.
             </DialogDescription>
           </DialogHeader>
           {checkoutState === "success" ? (
             <div className="border border-border p-4 text-sm">
               <p className="font-medium">Sandbox payment approved</p>
-              <p className="mt-1 text-muted-foreground">No real payment was taken and no rental order was created.</p>
+              <p className="mt-1 text-muted-foreground">No real payment was taken. Your rental order was recorded for this demo.</p>
             </div>
           ) : (
             <form
@@ -168,7 +172,32 @@ export function CartSheet({
               onSubmit={(event) => {
                 event.preventDefault();
                 setCheckoutState("processing");
-                window.setTimeout(() => setCheckoutState(cardNumber.replace(/\s/g, "").endsWith("0002") ? "declined" : "success"), 700);
+                void (async () => {
+                  try {
+                    if (cardNumber.replace(/\s/g, "").endsWith("0002")) throw new Error("Sandbox payment declined. Use another test card.");
+                    const accessToken = await currentAccessToken();
+                    if (!accessToken) throw new Error("Log in before checking out a rental.");
+                    const start = new Date();
+                    const end = new Date(start.getTime() + Math.max(1, Math.max(...items.map((item) => item.days))) * 86400000);
+                    const result = await createOrder({
+                      data: {
+                        accessToken,
+                        items: items.map(({ product, days, size }) => ({
+                          productId: product.id,
+                          slug: product.slug,
+                          size,
+                          start: start.toISOString().slice(0, 10),
+                          end: new Date(start.getTime() + days * 86400000).toISOString().slice(0, 10),
+                        })),
+                      },
+                    });
+                    setCheckoutState("success");
+                    toast.success(`Rental order ${result.orderId.slice(0, 8)} confirmed.`);
+                  } catch (error) {
+                    setCheckoutState("declined");
+                    toast.error(error instanceof Error ? error.message : "Rental checkout failed.");
+                  }
+                })();
               }}
             >
               <div className="space-y-1"><label htmlFor="sandbox-card" className="text-xs">Card number</label><Input id="sandbox-card" required inputMode="numeric" value={cardNumber} onChange={(event) => setCardNumber(event.target.value)} placeholder="4242 4242 4242 4242" /></div>

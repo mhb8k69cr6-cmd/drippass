@@ -130,12 +130,12 @@ function Home() {
     window.history.replaceState(null, "", `${window.location.pathname}${params.toString() ? `?${params}` : ""}`);
   };
 
-  const addToCart = (product: Product, days: number) => {
+  const addToCart = (product: Product, days: number, size: string) => {
     if (!product.available) {
       toast.error("Waitlist is unavailable: no persistence service is configured.");
       return;
     }
-    setCart((c) => (c.some((i) => i.product.id === product.id) ? c : [...c, { product, days }]));
+    setCart((c) => (c.some((i) => i.product.id === product.id) ? c : [...c, { product, days, size }]));
     setModalOpen(false);
     setCartOpen(true);
     toast.success(`${product.title} reserved for ${days} days`);
@@ -354,7 +354,7 @@ function Home() {
         product={selected}
         open={modalOpen}
         onOpenChange={setModalOpen}
-        onAddToCart={(days) => selected && addToCart(selected, days)}
+        onAddToCart={(days, size) => selected && addToCart(selected, days, size)}
         onTryOn={() => {
           setModalOpen(false);
         }}

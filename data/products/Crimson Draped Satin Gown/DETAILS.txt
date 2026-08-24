@@ -1,0 +1,9 @@
+DESCRIPTION: An elegant floor-length red satin gown featuring a fitted silhouette, ruched detailing through the bodice and waist, a sleek halter neckline, and a dramatic flowing draped train. Designed for glamorous evening events, formal occasions, and statement entrances.
+SIZES: S, M, L, XL
+CATEGORY: Dresses
+COLOR: Crimson red
+MATERIAL: Satin
+STOCK: IN STOCK
+SKU: DRS-004
+TAGS: satin, eveningwear, formal, glamorous
+FEATURED: FALSE
