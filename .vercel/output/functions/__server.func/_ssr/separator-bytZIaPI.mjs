@@ -1,7 +1,7 @@
 import { i as __toESM } from "../_runtime.mjs";
 import { u as require_react } from "../_libs/@floating-ui/react-dom+[...].mjs";
 import { v as require_jsx_runtime } from "../_libs/@radix-ui/react-accordion+[...].mjs";
-import { M as Check } from "../_libs/lucide-react.mjs";
+import { N as Check } from "../_libs/lucide-react.mjs";
 import { r as cn } from "./button-PwNqyxv_.mjs";
 import { n as CheckboxIndicator, t as Checkbox$1 } from "../_libs/@radix-ui/react-checkbox+[...].mjs";
 import { t as Root } from "../_libs/radix-ui__react-separator.mjs";

@@ -300,6 +300,26 @@ var Copy = createLucideIcon("copy", [["rect", {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var CreditCard = createLucideIcon("credit-card", [["rect", {
+	width: "20",
+	height: "14",
+	x: "2",
+	y: "5",
+	rx: "2",
+	key: "ynyp8z"
+}], ["line", {
+	x1: "2",
+	x2: "22",
+	y1: "10",
+	y2: "10",
+	key: "1b3vmo"
+}]]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Crown = createLucideIcon("crown", [["path", {
 	d: "M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z",
 	key: "1vdc57"
@@ -831,4 +851,4 @@ var X = createLucideIcon("x", [["path", {
 	key: "d8bk6v"
 }]]);
 //#endregion
-export { ChevronLeft as A, Heart as C, Circle as D, Copy as E, CalendarDays as F, Bookmark as I, Check as M, Camera as N, ChevronUp as O, Calendar as P, Instagram as S, Crown as T, Mic as _, Trash2 as a, LoaderCircle as b, Sparkles as c, ShieldCheck as d, Send as f, Music2 as g, Package as h, Truck as i, ChevronDown as j, ChevronRight as k, SlidersHorizontal as l, PanelTopOpen as m, User as n, Tag as o, Search as p, Upload as r, Star as s, X as t, ShoppingBag as u, MapPin as v, ExternalLink as w, LayoutGrid as x, LocateFixed as y };
+export { ChevronRight as A, Heart as C, Copy as D, CreditCard as E, Calendar as F, CalendarDays as I, Bookmark as L, ChevronDown as M, Check as N, Circle as O, Camera as P, Instagram as S, Crown as T, Mic as _, Trash2 as a, LoaderCircle as b, Sparkles as c, ShieldCheck as d, Send as f, Music2 as g, Package as h, Truck as i, ChevronLeft as j, ChevronUp as k, SlidersHorizontal as l, PanelTopOpen as m, User as n, Tag as o, Search as p, Upload as r, Star as s, X as t, ShoppingBag as u, MapPin as v, ExternalLink as w, LayoutGrid as x, LocateFixed as y };

@@ -1,5 +1,5 @@
-import { o as PRODUCTS } from "./products-Bl5euSZz.mjs";
 import { v as require_jsx_runtime } from "../_libs/@radix-ui/react-accordion+[...].mjs";
+import { o as PRODUCTS } from "./products-Bl5euSZz.mjs";
 import { t as ProductCard } from "./ProductCard-C0GioFDC.mjs";
 //#region node_modules/.nitro/vite/services/ssr/assets/rent-CI_8iVxr.js
 var import_jsx_runtime = require_jsx_runtime();
