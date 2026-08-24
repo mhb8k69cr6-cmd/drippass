@@ -92,7 +92,7 @@ export function useLookbook() {
       designer: entry.designer,
       category: entry.category,
     });
-    if (error) throw new Error("The look could not be saved to your lookbook.");
+    if (error) throw new Error(`The look could not be saved to your lookbook: ${error.message}`);
     setLooks((l) => [entry, ...l]);
     return entry;
   }, []);

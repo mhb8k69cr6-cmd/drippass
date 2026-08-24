@@ -43,7 +43,14 @@ async function parseResponse<T>(response: Response, provider: string): Promise<T
   if (response.status === 401 || response.status === 403)
     throw new Error(`${provider} rejected the server credential. Check its API key.`);
   if (response.status === 429) throw new Error(`${provider} is busy right now. Try again shortly.`);
-  if (!response.ok) throw new Error(`${provider} could not respond right now.`);
+  if (!response.ok) {
+    let detail = "";
+    try {
+      const body = (await response.json()) as { error?: string; message?: string };
+      detail = body.error ?? body.message ?? "";
+    } catch { /* upstream did not return JSON */ }
+    throw new Error(`${provider} could not respond right now.${detail ? ` ${detail}` : ""}`);
+  }
   return (await response.json()) as T;
 }
 
@@ -57,7 +64,7 @@ export async function generateText(request: TextRequest) {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "deepseek-ai/DeepSeek-V4-Pro-0813:novita",
+        model: process.env["HF_MODEL"] ?? "deepseek-ai/DeepSeek-V3-0324",
         messages: [
           { role: "system", content: request.system },
           { role: "user", content: request.user },

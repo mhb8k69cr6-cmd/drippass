@@ -67,8 +67,8 @@ function TryOnPage() {
             product={product}
             onRent={() => { if (product) window.location.assign(`/rent/${product.slug}`); }}
             onSave={async (look) => {
-              if (!product || !look.photo) return;
-              await saveLook({ productId: product.id, title: product.title, designer: product.designer, category: product.category, image: look.photo, photo: look.photo, fit: look.fit, pose: look.pose });
+              if (!look.photo) return;
+              await saveLook({ productId: look.product.id, title: look.product.title, designer: look.product.designer, category: look.product.category, image: look.photo, photo: look.photo, fit: look.fit, pose: look.pose });
             }}
           />
         </div>

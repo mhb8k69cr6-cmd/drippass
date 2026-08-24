@@ -375,6 +375,7 @@ function Home() {
         onAddToCart={(days, size) => selected && addToCart(selected, days, size)}
         onTryOn={() => {
           setModalOpen(false);
+          if (selected) void navigate({ to: "/try-on", search: { product: selected.slug } });
         }}
       />
       <CartSheet

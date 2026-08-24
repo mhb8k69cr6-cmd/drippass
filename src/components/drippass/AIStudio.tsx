@@ -40,7 +40,7 @@ export function AIStudio({
 }: {
   product: Product | null;
   onRent: () => void;
-  onSave: (look: { photo: string | null; fit: number; pose: number }) => void | Promise<void>;
+  onSave: (look: { photo: string | null; fit: number; pose: number; product: Product }) => void | Promise<void>;
 }) {
   const [activeProduct, setActiveProduct] = useState<Product | null>(product);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -164,7 +164,7 @@ export function AIStudio({
       return;
     }
     try {
-      await onSave({ photo: generatedPhoto, fit: 55, pose: 2 });
+      await onSave({ photo: generatedPhoto, fit: 55, pose: 2, product: activeProduct });
       setSaved(true);
       toast.success("Look saved to your lookbook.");
     } catch (error) {
