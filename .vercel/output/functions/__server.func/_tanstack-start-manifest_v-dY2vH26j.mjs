@@ -1,4 +1,4 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-GMtTmASd.js
+//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-dY2vH26j.js
 var tsrStartManifest = () => ({ routes: {
 	__root__: {
 		filePath: "C:/CODE/drippass/src/routes/__root.tsx",
@@ -13,7 +13,7 @@ var tsrStartManifest = () => ({ routes: {
 			"/checkout/membership/$plan"
 		],
 		preloads: [
-			"/assets/index-yfR6rwl9.js",
+			"/assets/index-CLNyX9Hy.js",
 			"/assets/jsx-runtime-B-hcVAMW.js",
 			"/assets/react-dom-sF8Euvcq.js",
 			"/assets/link-D0Ux4urd.js",
@@ -26,20 +26,20 @@ var tsrStartManifest = () => ({ routes: {
 		scripts: [{ attrs: {
 			type: "module",
 			async: !0,
-			src: "/assets/index-yfR6rwl9.js"
+			src: "/assets/index-CLNyX9Hy.js"
 		} }]
 	},
 	"/": {
 		filePath: "C:/CODE/drippass/src/routes/index.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/routes-DxkZTuxZ.js",
-			"/assets/pass-client-C18aKV_e.js",
+			"/assets/routes-DLQYUa3V.js",
+			"/assets/pass-client-DCaLpLZS.js",
 			"/assets/useServerFn-CS_xDc1Q.js",
 			"/assets/check-36OnHiEM.js",
 			"/assets/chevron-left-BqXVpTN8.js",
-			"/assets/lookbook-byDESy4L.js",
-			"/assets/ProductCard-CTPPAIEG.js",
+			"/assets/lookbook-8mnfVo6u.js",
+			"/assets/ProductCard-i9gXBHAW.js",
 			"/assets/dist-paZDpNB_.js",
 			"/assets/supabase-eQtnqLTO.js",
 			"/assets/button-DqMoD1nw.js",
@@ -57,12 +57,12 @@ var tsrStartManifest = () => ({ routes: {
 		filePath: "C:/CODE/drippass/src/routes/passes.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/passes-CthDZe_M.js",
-			"/assets/pass-client-C18aKV_e.js",
+			"/assets/passes-ZWFpi42L.js",
+			"/assets/pass-client-DCaLpLZS.js",
 			"/assets/useServerFn-CS_xDc1Q.js",
 			"/assets/check-36OnHiEM.js",
 			"/assets/button-DqMoD1nw.js",
-			"/assets/pass.functions-DqB-zZo6.js",
+			"/assets/pass.functions-CHHOFCkx.js",
 			"/assets/badge-C8ENvxMm.js"
 		]
 	},
@@ -75,10 +75,10 @@ var tsrStartManifest = () => ({ routes: {
 		filePath: "C:/CODE/drippass/src/routes/try-on.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/try-on-Bq50HnFw.js",
-			"/assets/pass-client-C18aKV_e.js",
+			"/assets/try-on-c9dBS_ku.js",
+			"/assets/pass-client-DCaLpLZS.js",
 			"/assets/useServerFn-CS_xDc1Q.js",
-			"/assets/lookbook-byDESy4L.js",
+			"/assets/lookbook-8mnfVo6u.js",
 			"/assets/dist-paZDpNB_.js",
 			"/assets/button-DqMoD1nw.js",
 			"/assets/label-BCVLQBQv.js"
@@ -88,7 +88,7 @@ var tsrStartManifest = () => ({ routes: {
 		filePath: "C:/CODE/drippass/src/routes/rent/$slug.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/_slug-I6xMDFFy.js",
+			"/assets/_slug-CgsUWyRi.js",
 			"/assets/check-36OnHiEM.js",
 			"/assets/chevron-left-BqXVpTN8.js",
 			"/assets/dist-paZDpNB_.js",
@@ -100,20 +100,20 @@ var tsrStartManifest = () => ({ routes: {
 	"/rent/": {
 		filePath: "C:/CODE/drippass/src/routes/rent/index.tsx",
 		children: void 0,
-		preloads: ["/assets/rent-DWfXOY3X.js", "/assets/ProductCard-CTPPAIEG.js"]
+		preloads: ["/assets/rent-tb5W2Dm5.js", "/assets/ProductCard-i9gXBHAW.js"]
 	},
 	"/checkout/membership/$plan": {
 		filePath: "C:/CODE/drippass/src/routes/checkout/membership/$plan.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/_plan-B_DjXQSK.js",
-			"/assets/pass-client-C18aKV_e.js",
+			"/assets/_plan-B_m7r7g8.js",
+			"/assets/pass-client-DCaLpLZS.js",
 			"/assets/check-36OnHiEM.js",
 			"/assets/chevron-left-BqXVpTN8.js",
 			"/assets/dist-paZDpNB_.js",
 			"/assets/button-DqMoD1nw.js",
 			"/assets/input-xygOeItP.js",
-			"/assets/pass.functions-DqB-zZo6.js"
+			"/assets/pass.functions-CHHOFCkx.js"
 		]
 	}
 } });

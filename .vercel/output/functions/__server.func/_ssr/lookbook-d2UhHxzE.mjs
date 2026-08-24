@@ -7,7 +7,7 @@ import { t as supabase } from "./supabase-DHkNjKmq.mjs";
 import { a as DialogOverlay$1, i as DialogDescription$1, n as DialogClose, o as DialogPortal$1, r as DialogContent$1, s as DialogTitle$1, t as Dialog$1 } from "../_libs/@radix-ui/react-dialog+[...].mjs";
 import { n as CheckboxIndicator, t as Checkbox$1 } from "../_libs/@radix-ui/react-checkbox+[...].mjs";
 import { t as Root } from "../_libs/radix-ui__react-separator.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/lookbook-C2GCr3vD.js
+//#region node_modules/.nitro/vite/services/ssr/assets/lookbook-d2UhHxzE.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var Dialog = Dialog$1;
@@ -74,6 +74,8 @@ Separator.displayName = Root.displayName;
 function useLookbook() {
 	const [wishlist, setWishlist] = (0, import_react.useState)([]);
 	const [looks, setLooks] = (0, import_react.useState)([]);
+	const remoteUnavailable = (0, import_react.useRef)(typeof window !== "undefined" && window.localStorage.getItem("drippass.lookbook.remote-unavailable") === "true");
+	const localKey = (userId, suffix) => `drippass.${suffix}.${userId}`;
 	(0, import_react.useEffect)(() => {
 		const client = supabase;
 		if (!client) return;
@@ -81,8 +83,24 @@ function useLookbook() {
 		const load = async () => {
 			const { data: auth } = await client.auth.getUser();
 			if (!auth.user) return;
-			const [{ data: wishlistRows }, { data: lookRows }] = await Promise.all([client.from("wishlist_items").select("product_id").eq("user_id", auth.user.id), client.from("lookbook_entries").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: false })]);
+			const localLooks = () => {
+				try {
+					setWishlist(JSON.parse(window.localStorage.getItem(localKey(auth.user.id, "wishlist")) ?? "[]"));
+					setLooks(JSON.parse(window.localStorage.getItem(localKey(auth.user.id, "looks")) ?? "[]"));
+				} catch {}
+			};
+			if (remoteUnavailable.current) {
+				localLooks();
+				return;
+			}
+			const [{ data: wishlistRows, error: wishlistError }, { data: lookRows, error: lookbookError }] = await Promise.all([client.from("wishlist_items").select("product_id").eq("user_id", auth.user.id), client.from("lookbook_entries").select("*").eq("user_id", auth.user.id).order("created_at", { ascending: false })]);
 			if (!active) return;
+			if (wishlistError?.code === "PGRST205" || lookbookError?.code === "PGRST205") {
+				remoteUnavailable.current = true;
+				window.localStorage.setItem("drippass.lookbook.remote-unavailable", "true");
+				localLooks();
+				return;
+			}
 			setWishlist((wishlistRows ?? []).map((row) => String(row.product_id)));
 			setLooks((lookRows ?? []).map((row) => ({
 				id: String(row.id),
@@ -111,13 +129,14 @@ function useLookbook() {
 			setWishlist((s) => {
 				const exists = s.includes(id);
 				const client = supabase;
-				if (client) client.auth.getUser().then(({ data }) => {
+				if (client && !remoteUnavailable.current) client.auth.getUser().then(({ data }) => {
 					if (!data.user) return;
 					if (exists) client.from("wishlist_items").delete().eq("user_id", data.user.id).eq("product_id", id);
 					else client.from("wishlist_items").insert({
 						user_id: data.user.id,
 						product_id: id
 					});
+					window.localStorage.setItem(localKey(data.user.id, "wishlist"), JSON.stringify(exists ? s.filter((x) => x !== id) : [...s, id]));
 				});
 				return exists ? s.filter((x) => x !== id) : [...s, id];
 			});
@@ -133,7 +152,10 @@ function useLookbook() {
 				id: crypto.randomUUID(),
 				createdAt: Date.now()
 			};
-			const { error } = await client.from("lookbook_entries").insert({
+			const { error } = remoteUnavailable.current ? { error: {
+				code: "PGRST205",
+				message: "Lookbook table is unavailable"
+			} } : await client.from("lookbook_entries").insert({
 				id: entry.id,
 				user_id: auth.user.id,
 				product_id: entry.productId,
@@ -143,13 +165,27 @@ function useLookbook() {
 				designer: entry.designer,
 				category: entry.category
 			});
-			if (error) throw new Error(`The look could not be saved to your lookbook: ${error.message}`);
+			if (error?.code === "PGRST205") {
+				remoteUnavailable.current = true;
+				const existing = JSON.parse(window.localStorage.getItem(localKey(auth.user.id, "looks")) ?? "[]");
+				window.localStorage.setItem(localKey(auth.user.id, "looks"), JSON.stringify([entry, ...existing]));
+			} else if (error) throw new Error(`The look could not be saved to your lookbook: ${error.message}`);
+			if (!error) {
+				const existing = JSON.parse(window.localStorage.getItem(localKey(auth.user.id, "looks")) ?? "[]");
+				window.localStorage.setItem(localKey(auth.user.id, "looks"), JSON.stringify([entry, ...existing]));
+			}
 			setLooks((l) => [entry, ...l]);
 			return entry;
 		}, []),
 		removeLook: (0, import_react.useCallback)((id) => {
 			setLooks((l) => l.filter((x) => x.id !== id));
 			if (supabase) supabase.from("lookbook_entries").delete().eq("id", id);
+			if (supabase) supabase.auth.getUser().then(({ data }) => {
+				if (!data.user) return;
+				const key = localKey(data.user.id, "looks");
+				const existing = JSON.parse(window.localStorage.getItem(key) ?? "[]");
+				window.localStorage.setItem(key, JSON.stringify(existing.filter((look) => look.id !== id)));
+			});
 		}, []),
 		setCaption: (0, import_react.useCallback)((id, caption) => {
 			setLooks((l) => l.map((x) => x.id === id ? {
@@ -157,6 +193,15 @@ function useLookbook() {
 				caption
 			} : x));
 			if (supabase) supabase.from("lookbook_entries").update({ caption }).eq("id", id);
+			if (supabase) supabase.auth.getUser().then(({ data }) => {
+				if (!data.user) return;
+				const key = localKey(data.user.id, "looks");
+				const existing = JSON.parse(window.localStorage.getItem(key) ?? "[]");
+				window.localStorage.setItem(key, JSON.stringify(existing.map((look) => look.id === id ? {
+					...look,
+					caption
+				} : look)));
+			});
 		}, [])
 	};
 }

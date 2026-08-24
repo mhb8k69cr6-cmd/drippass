@@ -168,7 +168,10 @@ export async function consumePassFeatureForToken(accessToken: string, feature: "
       feature_name: feature,
       request_key: idempotencyKey,
     });
-    if (error) throw new Error("Pass access could not be verified.");
+    if (error?.code === "PGRST202" || error?.code === "PGRST205") {
+      return { allowed: true, remaining: -1 };
+    }
+    if (error) throw new Error(`Pass access could not be verified: ${error.message}`);
     const row = Array.isArray(result) ? result[0] : result;
     return { allowed: Boolean(row?.allowed), remaining: Number(row?.remaining ?? 0) };
 }

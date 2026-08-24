@@ -7,7 +7,7 @@ import { c as getProductBySlug } from "./products-Ca9-eqQe.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import { t as QueryClientProvider } from "../_libs/tanstack__react-query.mjs";
 import { T as Crown, c as Sparkles, x as LayoutGrid } from "../_libs/lucide-react.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-BJ-YYJXr.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-5_FOEWFF.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var styles_default = "/assets/styles-DhAROyK-.css";
@@ -226,7 +226,7 @@ function RootComponent() {
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Outlet, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NavigationDock, {})]
 	});
 }
-var $$splitComponentImporter$7 = () => import("./routes-Bh6GQD3s.mjs");
+var $$splitComponentImporter$7 = () => import("./routes--VkhVFmh.mjs");
 var Route$7 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: "DRIPPASS — Rent Designer Fashion | Wear. Return. Repeat." },
@@ -261,7 +261,7 @@ var Route$6 = createFileRoute("/login")({
 	}] }),
 	component: lazyRouteComponent($$splitComponentImporter$6, "component")
 });
-var $$splitComponentImporter$5 = () => import("./passes-AtCS7gyX.mjs");
+var $$splitComponentImporter$5 = () => import("./passes-CaKQ1suC.mjs");
 var Route$5 = createFileRoute("/passes")({
 	head: () => ({ meta: [{ title: "Subscription Plans | DRIPPASS" }, {
 		name: "description",
@@ -277,7 +277,7 @@ var Route$4 = createFileRoute("/signup")({
 	}] }),
 	component: lazyRouteComponent($$splitComponentImporter$4, "component")
 });
-var $$splitComponentImporter$3 = () => import("./try-on-Ds_QItx-.mjs");
+var $$splitComponentImporter$3 = () => import("./try-on-UehoYc2D.mjs");
 var Route$3 = createFileRoute("/try-on")({
 	validateSearch: (search) => ({ product: typeof search["product"] === "string" ? search["product"] : void 0 }),
 	head: () => ({ meta: [{ title: "AI Try-On Studio | DRIPPASS" }, {
@@ -294,7 +294,7 @@ var Route$2 = createFileRoute("/rent/")({
 	}] }),
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("../_slug-CTEJPXLD.mjs");
+var $$splitComponentImporter$1 = () => import("../_slug-CogFnw9B.mjs");
 var Route$1 = createFileRoute("/rent/$slug")({
 	loader: ({ params }) => {
 		const product = getProductBySlug(params.slug);
@@ -314,7 +314,7 @@ var Route$1 = createFileRoute("/rent/$slug")({
 	] : [] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("../_plan-Em3pMr7Z.mjs");
+var $$splitComponentImporter = () => import("../_plan-DlnuvkkN.mjs");
 var Route = createFileRoute("/checkout/membership/$plan")({
 	head: () => ({ meta: [{ title: "Membership Checkout | DRIPPASS" }, {
 		name: "description",

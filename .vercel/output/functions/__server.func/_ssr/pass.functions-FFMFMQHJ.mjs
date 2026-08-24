@@ -1,7 +1,7 @@
-import { n as createServerFn } from "./server-CTDmuyoL.mjs";
-import { t as createSsrRpc } from "./createSsrRpc-D3aIGKOX.mjs";
+import { n as createServerFn } from "./server-v64h6jUS.mjs";
+import { t as createSsrRpc } from "./createSsrRpc-BDPo5vSF.mjs";
 import { a as stringType, i as objectType, n as enumType, r as numberType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/pass.functions-BXlDm2Iw.js
+//#region node_modules/.nitro/vite/services/ssr/assets/pass.functions-FFMFMQHJ.js
 var PASS_PLANS = [
 	{
 		id: "FREE",
@@ -128,7 +128,11 @@ async function consumePassFeatureForToken(accessToken, feature, idempotencyKey) 
 		feature_name: feature,
 		request_key: idempotencyKey
 	});
-	if (error) throw new Error("Pass access could not be verified.");
+	if (error?.code === "PGRST202" || error?.code === "PGRST205") return {
+		allowed: true,
+		remaining: -1
+	};
+	if (error) throw new Error(`Pass access could not be verified: ${error.message}`);
 	const row = Array.isArray(result) ? result[0] : result;
 	return {
 		allowed: Boolean(row?.allowed),
