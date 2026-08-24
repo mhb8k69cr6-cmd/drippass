@@ -3,12 +3,12 @@ import { u as require_react } from "./_libs/@floating-ui/react-dom+[...].mjs";
 import { v as Link } from "./_libs/@tanstack/react-router+[...].mjs";
 import { v as require_jsx_runtime } from "./_libs/@radix-ui/react-accordion+[...].mjs";
 import { I as CalendarDays, N as Check, d as ShieldCheck, j as ChevronLeft } from "./_libs/lucide-react.mjs";
-import { r as Route$1 } from "./_ssr/router-5_FOEWFF.mjs";
+import { r as Route$1 } from "./_ssr/router-G_Q9TxVZ.mjs";
 import { t as Button } from "./_ssr/button-PwNqyxv_.mjs";
 import { t as Input } from "./_ssr/input-uzm9g8Y7.mjs";
 import { n as toast } from "./_libs/sonner.mjs";
 import { t as Badge } from "./_ssr/badge-B3f60TId.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/_slug-CogFnw9B.js
+//#region node_modules/.nitro/vite/services/ssr/assets/_slug-8SjHXaUa.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function ProductDetail() {

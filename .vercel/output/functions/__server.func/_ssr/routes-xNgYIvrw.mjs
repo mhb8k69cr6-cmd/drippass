@@ -2,8 +2,8 @@ import { i as __toESM } from "../_runtime.mjs";
 import { u as require_react } from "../_libs/@floating-ui/react-dom+[...].mjs";
 import { y as useNavigate } from "../_libs/@tanstack/react-router+[...].mjs";
 import { a as Trigger2, i as Root2, n as Header, r as Item, t as Content2, v as require_jsx_runtime } from "../_libs/@radix-ui/react-accordion+[...].mjs";
-import { n as createServerFn } from "./server-v64h6jUS.mjs";
-import { t as createSsrRpc } from "./createSsrRpc-BDPo5vSF.mjs";
+import { n as createServerFn } from "./server-CDxyXkL1.mjs";
+import { t as createSsrRpc } from "./createSsrRpc-D2pCnit5.mjs";
 import { a as stringType, i as objectType, n as enumType, r as numberType, t as arrayType } from "../_libs/zod.mjs";
 import { a as EVENTS, i as DURATIONS, n as BRANDS, o as PRODUCTS, r as CATEGORIES, s as SIZES, t as BANNERS } from "./products-Ca9-eqQe.mjs";
 import { A as ChevronRight, C as Heart, D as Copy, F as Calendar$1, M as ChevronDown, N as Check, O as Circle, S as Instagram, _ as Mic, a as Trash2, b as LoaderCircle, c as Sparkles, d as ShieldCheck, g as Music2, h as Package, i as Truck, j as ChevronLeft, k as ChevronUp, l as SlidersHorizontal, m as PanelTopOpen, n as User, o as Tag, p as Search, s as Star, t as X, u as ShoppingBag, v as MapPin, y as LocateFixed } from "../_libs/lucide-react.mjs";
@@ -26,7 +26,7 @@ import { N as addDays, O as differenceInCalendarDays, l as format } from "../_li
 import { n as getDefaultClassNames, t as DayPicker } from "../_libs/react-day-picker.mjs";
 import { i as Trigger$1, n as Portal, r as Root2$2, t as Content2$2 } from "../_libs/radix-ui__react-popover.mjs";
 import { i as Trigger$2, n as List, r as Root2$3, t as Content } from "../_libs/radix-ui__react-tabs.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes--VkhVFmh.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-xNgYIvrw.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var Sheet = Dialog;
@@ -1979,34 +1979,26 @@ function filtersFromUrl() {
 }
 function Home() {
 	const [category, setCategory] = (0, import_react.useState)("New Drops");
-	const [filters, setFilters] = (0, import_react.useState)(filtersFromUrl);
+	const [filters, setFilters] = (0, import_react.useState)(DEFAULT_FILTERS);
 	const [sort, setSort] = (0, import_react.useState)("trending");
 	const [selected, setSelected] = (0, import_react.useState)(PRODUCTS[0] ?? null);
 	const [modalOpen, setModalOpen] = (0, import_react.useState)(false);
 	const [cartOpen, setCartOpen] = (0, import_react.useState)(false);
-	const [cart, setCart] = (0, import_react.useState)(() => {
-		if (typeof window === "undefined") return [];
-		try {
-			return JSON.parse(window.localStorage.getItem("drippass.cart") ?? "[]");
-		} catch {
-			return [];
-		}
-	});
+	const [cart, setCart] = (0, import_react.useState)([]);
 	const { wishlist: saved, toggleWishlist: toggleSave, looks, saveLook, removeLook, setCaption } = useLookbook();
 	const [accountOpen, setAccountOpen] = (0, import_react.useState)(false);
 	const [accountTab, setAccountTab] = (0, import_react.useState)("wishlist");
 	const [userName, setUserName] = (0, import_react.useState)(null);
-	const [location, setLocation] = (0, import_react.useState)(() => {
-		if (typeof window === "undefined") return "110001, Delhi";
-		return window.localStorage.getItem("drippass.location") ?? "110001, Delhi";
-	});
+	const [location, setLocation] = (0, import_react.useState)("110001, Delhi");
 	const [banner, setBanner] = (0, import_react.useState)(0);
 	const [searchQuery, setSearchQuery] = (0, import_react.useState)("");
-	const [passesExpanded, setPassesExpanded] = (0, import_react.useState)(() => {
-		if (typeof window === "undefined") return true;
-		return window.localStorage.getItem("drippass.passes-collapsed") !== "true";
-	});
+	const [passesExpanded, setPassesExpanded] = (0, import_react.useState)(true);
 	const navigate = useNavigate();
+	(0, import_react.useEffect)(() => {
+		setFilters(filtersFromUrl());
+		setLocation(window.localStorage.getItem("drippass.location") ?? "110001, Delhi");
+		setPassesExpanded(window.localStorage.getItem("drippass.passes-collapsed") !== "true");
+	}, []);
 	(0, import_react.useEffect)(() => {
 		if (!supabase) return;
 		supabase.auth.getSession().then(({ data }) => {

@@ -13,8 +13,8 @@ const ItemInput = z.object({
 const SessionInput = z.object({ accessToken: z.string().min(20) });
 
 function getSupabase(accessToken: string) {
-  const url = process.env["SUPABASE_URL"];
-  const key = process.env["SUPABASE_ANON_KEY"];
+  const url = process.env["SUPABASE_URL"] ?? process.env["VITE_SUPABASE_URL"];
+  const key = process.env["SUPABASE_ANON_KEY"] ?? process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? process.env["VITE_SUPABASE_ANON_KEY"];
   if (!url || !key) throw new Error("Persistence service is not configured.");
   return import("@supabase/supabase-js").then(({ createClient }) => createClient(url, key, { global: { headers: { Authorization: `Bearer ${accessToken}` } } }));
 }

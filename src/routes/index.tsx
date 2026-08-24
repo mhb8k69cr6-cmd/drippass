@@ -56,31 +56,28 @@ function filtersFromUrl(): Filters {
 
 function Home() {
   const [category, setCategory] = useState("New Drops");
-  const [filters, setFilters] = useState<Filters>(filtersFromUrl);
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [sort, setSort] = useState("trending");
   const [selected, setSelected] = useState<Product | null>(PRODUCTS[0] ?? null);
   const [modalOpen, setModalOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    if (typeof window === "undefined") return [];
-    try { return JSON.parse(window.localStorage.getItem("drippass.cart") ?? "[]") as CartItem[]; } catch { return []; }
-  });
+  const [cart, setCart] = useState<CartItem[]>([]);
   const { wishlist: saved, toggleWishlist: toggleSave, looks, saveLook, removeLook, setCaption } =
     useLookbook();
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountTab, setAccountTab] = useState("wishlist");
   const [userName, setUserName] = useState<string | null>(null);
-  const [location, setLocation] = useState(() => {
-    if (typeof window === "undefined") return "110001, Delhi";
-    return window.localStorage.getItem("drippass.location") ?? "110001, Delhi";
-  });
+  const [location, setLocation] = useState("110001, Delhi");
   const [banner, setBanner] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [passesExpanded, setPassesExpanded] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return window.localStorage.getItem("drippass.passes-collapsed") !== "true";
-  });
+  const [passesExpanded, setPassesExpanded] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setFilters(filtersFromUrl());
+    setLocation(window.localStorage.getItem("drippass.location") ?? "110001, Delhi");
+    setPassesExpanded(window.localStorage.getItem("drippass.passes-collapsed") !== "true");
+  }, []);
 
   useEffect(() => {
     if (!supabase) return;
