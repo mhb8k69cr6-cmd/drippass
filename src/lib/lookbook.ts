@@ -72,29 +72,28 @@ export function useLookbook() {
     });
   }, []);
 
-  const saveLook = useCallback((look: Omit<SavedLook, "id" | "createdAt">) => {
+  const saveLook = useCallback(async (look: Omit<SavedLook, "id" | "createdAt">) => {
+    const client = supabase;
+    if (!client) throw new Error("Lookbook storage is not configured.");
+    const { data: auth } = await client.auth.getUser();
+    if (!auth.user) throw new Error("Log in to save a look to your lookbook.");
     const entry: SavedLook = {
       ...look,
       id: crypto.randomUUID(),
       createdAt: Date.now(),
     };
+    const { error } = await client.from("lookbook_entries").insert({
+      id: entry.id,
+      user_id: auth.user.id,
+      product_id: entry.productId,
+      generated_image_url: entry.image,
+      original_product_image_url: entry.image,
+      title: entry.title,
+      designer: entry.designer,
+      category: entry.category,
+    });
+    if (error) throw new Error("The look could not be saved to your lookbook.");
     setLooks((l) => [entry, ...l]);
-    const client = supabase;
-    if (client) {
-      void client.auth.getUser().then(({ data }) => {
-        if (!data.user) return;
-        void client.from("lookbook_entries").insert({
-          id: entry.id,
-          user_id: data.user.id,
-          product_id: entry.productId,
-          generated_image_url: entry.image,
-          original_product_image_url: entry.image,
-          title: entry.title,
-          designer: entry.designer,
-          category: entry.category,
-        });
-      });
-    }
     return entry;
   }, []);
 

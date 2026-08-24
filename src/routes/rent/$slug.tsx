@@ -61,7 +61,7 @@ function ProductDetail() {
               <img
                 src={product.gallery[activeImage]}
                 alt={`${product.title} by ${product.designer}`}
-                className="h-full w-full object-cover"
+                className={`h-full w-full object-cover ${product.id === "MNE-009" ? "object-top" : ""}`}
               />
             </div>
             <div className="mt-3 grid grid-cols-3 gap-3">
@@ -73,7 +73,7 @@ function ProductDetail() {
                   className={`aspect-[3/4] overflow-hidden border ${index === activeImage ? "border-foreground" : "border-transparent opacity-60"}`}
                   aria-label={`View image ${index + 1}`}
                 >
-                  <img src={image} alt="" className="h-full w-full object-cover" />
+                  <img src={image} alt="" className={`h-full w-full object-cover ${product.id === "MNE-009" ? "object-top" : ""}`} />
                 </button>
               ))}
             </div>

@@ -40,7 +40,7 @@ export function AIStudio({
 }: {
   product: Product | null;
   onRent: () => void;
-  onSave: (look: { photo: string | null; fit: number; pose: number }) => void;
+  onSave: (look: { photo: string | null; fit: number; pose: number }) => void | Promise<void>;
 }) {
   const [activeProduct, setActiveProduct] = useState<Product | null>(product);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -158,13 +158,18 @@ export function AIStudio({
     window.setTimeout(() => setCopied(false), 1800);
   };
 
-  const saveCurrentLook = () => {
+  const saveCurrentLook = async () => {
     if (!activeProduct || !generatedPhoto) {
       toast.error("Upload the generated ChatGPT image before saving this look.");
       return;
     }
-    setSaved(true);
-    toast.success("Look saved to your account!");
+    try {
+      await onSave({ photo: generatedPhoto, fit: 55, pose: 2 });
+      setSaved(true);
+      toast.success("Look saved to your lookbook.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "The look could not be saved.");
+    }
   };
 
   const shareLook = async () => {
@@ -201,7 +206,7 @@ export function AIStudio({
             </div>
           ) : (
             <div className="mb-3 flex items-center gap-3 border border-border bg-card p-3">
-              <img src={activeProduct.image} alt={activeProduct.title} className="size-16 object-cover" />
+              <img src={activeProduct.image} alt={activeProduct.title} className={`size-16 object-cover ${activeProduct.id === "MNE-009" ? "object-top" : ""}`} />
               <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{activeProduct.title}</p><p className="text-xs text-muted-foreground">{activeProduct.designer} · ₹{activeProduct.perDay}/day</p><p className="text-[11px] text-muted-foreground">Sizes: {activeProduct.sizes.join(", ")}</p></div>
               <Button type="button" variant="outline" size="sm" className="rounded-none" onClick={() => setPickerOpen(true)}>Change garment</Button>
             </div>
@@ -288,7 +293,6 @@ export function AIStudio({
             <input ref={generatedFileRef} type="file" accept="image/*" hidden onChange={(event) => handleGeneratedFile(event.target.files?.[0])} />
             <Button type="button" variant="outline" className="mt-4 rounded-none" onClick={() => generatedFileRef.current?.click()}>Upload generated image</Button>
           </div>
-          <Button type="button" variant="outline" className="mt-3 w-full rounded-none" disabled={!generatedPhoto || !activeProduct} onClick={() => { saveCurrentLook(); onSave({ photo: generatedPhoto, fit: 55, pose: 2 }); }}><Bookmark className="size-3.5" /> Save to lookbook / wishlist</Button>
         </section>
       </div>
 
@@ -359,7 +363,7 @@ export function AIStudio({
             <div className="grid grid-cols-2 gap-2">
               <Button
                 variant="outline"
-                onClick={() => { saveCurrentLook(); onSave({ photo: generatedPhoto, fit: 55, pose: 2 }); }}
+                onClick={() => void saveCurrentLook()}
                 disabled={!activeProduct || !generatedPhoto}
                 className="gap-1.5 rounded-none text-xs"
               >

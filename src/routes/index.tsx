@@ -162,7 +162,7 @@ function Home() {
     product: Product,
     look: { photo: string | null; fit: number; pose: number },
   ) => {
-    saveLook({
+    void saveLook({
       productId: product.id,
       title: product.title,
       designer: product.designer,
@@ -171,8 +171,9 @@ function Home() {
       photo: look.photo,
       fit: look.fit,
       pose: look.pose,
+    }).then(() => toast.success("Look saved to your lookbook")).catch((error) => {
+      toast.error(error instanceof Error ? error.message : "The look could not be saved.");
     });
-    toast.success("Look saved to your lookbook");
   };
 
   const openAccount = (t: string) => {

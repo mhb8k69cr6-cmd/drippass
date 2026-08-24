@@ -66,10 +66,9 @@ function TryOnPage() {
           <AIStudio
             product={product}
             onRent={() => { if (product) window.location.assign(`/rent/${product.slug}`); }}
-            onSave={(look) => {
+            onSave={async (look) => {
               if (!product || !look.photo) return;
-              saveLook({ productId: product.id, title: product.title, designer: product.designer, category: product.category, image: look.photo, photo: look.photo, fit: look.fit, pose: look.pose });
-              toast.success("Generated look saved to your lookbook.");
+              await saveLook({ productId: product.id, title: product.title, designer: product.designer, category: product.category, image: look.photo, photo: look.photo, fit: look.fit, pose: look.pose });
             }}
           />
         </div>

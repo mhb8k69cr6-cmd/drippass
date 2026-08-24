@@ -1,0 +1,9 @@
+DESCRIPTION: A commanding black-on-black formal ensemble inspired by Maharaja tailoring, combining a structured embroidered bandhgala jacket with a refined straight-leg trouser silhouette. Designed for gala evenings, wedding receptions, and elevated cultural occasions.
+SIZES: S, M, L, XL
+CATEGORY: Menswear
+COLOR: Noir black
+MATERIAL: Textured jacquard
+STOCK: IN STOCK
+SKU: MNE-009
+TAGS: bandhgala, jacquard, formal, occasionwear, black tie
+FEATURED: TRUE

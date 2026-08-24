@@ -29,7 +29,7 @@ export function ProductCard({
               loading="lazy"
               width={768}
               height={1024}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${product.id === "MNE-009" ? "object-top" : ""}`}
             />
           </a>
         ) : (
@@ -40,7 +40,7 @@ export function ProductCard({
               loading="lazy"
               width={768}
               height={1024}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${product.id === "MNE-009" ? "object-top" : ""}`}
             />
           </button>
         )}
