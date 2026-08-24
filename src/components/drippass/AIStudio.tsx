@@ -21,7 +21,6 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { askStylist } from "@/lib/stylist.functions";
 import { currentAccessToken } from "@/lib/pass-client";
-import { consumePassFeatureForToken as consume } from "@/lib/pass.functions";
 import { PRODUCTS, type Product } from "@/data/products";
 import { buildTryOnPrompt } from "@/lib/try-on-prompt";
 import { toast } from "sonner";
@@ -55,6 +54,7 @@ export function AIStudio({
   const [saved, setSaved] = useState(false);
   const [step, setStep] = useState(1);
   const [generatedPhoto, setGeneratedPhoto] = useState<string | null>(null);
+  const [garmentBlob, setGarmentBlob] = useState<Blob | null>(null);
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
@@ -66,6 +66,18 @@ export function AIStudio({
   const send = useServerFn(askStylist);
 
   useEffect(() => setActiveProduct(product), [product]);
+
+  useEffect(() => {
+    let active = true;
+    setGarmentBlob(null);
+    if (activeProduct) {
+      void fetch(activeProduct.image).then((response) => {
+        if (!response.ok) throw new Error("The garment image could not be prepared.");
+        return response.blob();
+      }).then((blob) => { if (active) setGarmentBlob(blob); }).catch(() => undefined);
+    }
+    return () => { active = false; };
+  }, [activeProduct]);
 
   const prompt = buildTryOnPrompt(activeProduct?.title ?? "[INSERT GARMENT NAME]", activeProduct?.designer ?? "[INSERT BRAND NAME]");
 
@@ -110,23 +122,11 @@ export function AIStudio({
   };
 
   const runTryOn = async () => {
-    if (!userPhoto || !activeProduct || !consent || generating) return;
-    const chatgptWindow = window.open("about:blank", "_blank");
+    if (generating) return;
     setGenerating(true);
     try {
-      const personBlob = await fetch(userPhoto).then((response) => response.blob());
-      const garmentBlob = await fetch(activeProduct.image).then((response) => {
-        if (!response.ok) throw new Error("The garment image could not be downloaded.");
-        return response.blob();
-      });
-      const accessToken = await currentAccessToken();
-      if (!accessToken) throw new Error("Log in to use AI Try-On and receive your Free Pass allowance.");
-      const usage = await consume(accessToken, "AI_TRY_ON", crypto.randomUUID());
-      if (!usage.allowed) {
-        chatgptWindow?.close();
-        toast.error("Your free AI Try-On has been used. Explore Passes to continue.");
-        return;
-      }
+      try { await navigator.clipboard?.writeText(prompt); } catch { toast.info("Prompt copying was blocked by the browser."); }
+
       const download = (blob: Blob, filename: string) => {
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
@@ -137,24 +137,16 @@ export function AIStudio({
         link.remove();
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       };
-      try {
-        await navigator.clipboard.writeText(prompt);
-      } catch {
-        toast.info("Prompt copying was blocked. The prompt remains available to select manually.");
+      if (userPhoto) {
+        const personResponse = await fetch(userPhoto);
+        if (personResponse.ok) download(await personResponse.blob(), "1_person_photo.jpg");
       }
-      download(personBlob, "1_person_photo.jpg");
-      download(garmentBlob, "2_garment_photo.jpg");
-      if (chatgptWindow) {
-        chatgptWindow.location.href = "https://chatgpt.com/images";
-      } else {
-        toast.info("Your browser blocked the new tab. Open ChatGPT Images manually to continue.");
-      }
+      if (garmentBlob) download(garmentBlob, "2_garment_photo.jpg");
       setCopied(true);
       setStep(3);
-      toast.success("Prompt copied, ChatGPT Images opened, and both images downloaded separately.");
+      toast.success("Prompt copied and both images downloaded separately. ChatGPT Images is open in the new tab.");
     } catch (error) {
-      chatgptWindow?.close();
-      toast.error(error instanceof Error ? error.message : "Try-on generation failed.");
+      toast.error(error instanceof Error ? error.message : "Try-on handoff failed. Try again.");
     } finally {
       setGenerating(false);
     }
@@ -277,8 +269,10 @@ export function AIStudio({
               <Checkbox id="try-on-consent" checked={consent} onCheckedChange={(checked) => setConsent(checked === true)} />
               <Label htmlFor="try-on-consent" className="text-[11px] font-normal leading-relaxed">I consent to this photo being used for one try-on generation in ChatGPT Images.</Label>
             </div>
-            <Button type="button" onClick={runTryOn} disabled={!userPhoto || !activeProduct || !consent || generating} className="w-full rounded-none bg-gradient-neon text-foreground">
+            <Button asChild className="w-full rounded-none bg-gradient-neon text-foreground">
+              <a href="https://chatgpt.com/images" target="_blank" rel="noreferrer" onClick={() => void runTryOn()}>
               {generating ? "Preparing ChatGPT Images…" : copied ? "Prompt copied · ChatGPT Images opened" : "Generate try-on"}
+              </a>
             </Button>
             <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">Instructions: ChatGPT Images opens in a new tab. Upload both downloaded files, paste the copied prompt, generate the image, then return here and upload the generated result.</p>
           </div>
@@ -295,66 +289,68 @@ export function AIStudio({
             <Button type="button" variant="outline" className="mt-4 rounded-none" onClick={() => generatedFileRef.current?.click()}>Upload generated image</Button>
           </div>
           <Button type="button" variant="outline" className="mt-3 w-full rounded-none" disabled={!generatedPhoto || !activeProduct} onClick={() => { saveCurrentLook(); onSave({ photo: generatedPhoto, fit: 55, pose: 2 }); }}><Bookmark className="size-3.5" /> Save to lookbook / wishlist</Button>
-          <Separator className="my-6" />
-          <p className="mb-2 text-[10px] tracking-luxe text-muted-foreground">STEP 3 — ASK AI STYLIST · 1 FREE SESSION</p>
-          <div className="space-y-3">
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={
-                  m.role === "user"
-                    ? "ml-auto w-fit max-w-[85%] bg-foreground px-3 py-2 text-xs text-background"
-                    : "max-w-[95%] text-xs leading-relaxed text-foreground"
-                }
-              >
-                {m.text}
-              </div>
-            ))}
-            {pending && (
-              <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Loader2 className="size-3 animate-spin" /> Styling your look…
-              </p>
-            )}
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {QUICK_PROMPTS.map((q) => (
-              <button
-                key={q}
-                onClick={() => ask(q)}
-                className="border border-border px-2 py-1 text-[10px] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              ask(input);
-            }}
-            className="mt-3 flex items-end gap-2"
-          >
-            <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  ask(input);
-                }
-              }}
-              rows={2}
-              placeholder="Ask AI Stylist…"
-              className="min-h-0 resize-none rounded-none text-xs"
-            />
-            <Button type="submit" size="icon" disabled={pending} className="rounded-none bg-gradient-neon text-foreground">
-              <Send className="size-4" />
-            </Button>
-          </form>
         </section>
       </div>
+
+      <section className="border-t border-border p-4">
+        <p className="mb-2 text-[10px] tracking-luxe text-muted-foreground">AI STYLIST · 1 FREE SESSION</p>
+        <div className="space-y-3">
+          {messages.map((m, i) => (
+            <div
+              key={i}
+              className={
+                m.role === "user"
+                  ? "ml-auto w-fit max-w-[85%] bg-foreground px-3 py-2 text-xs text-background"
+                  : "max-w-[95%] text-xs leading-relaxed text-foreground"
+              }
+            >
+              {m.text}
+            </div>
+          ))}
+          {pending && (
+            <p className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Loader2 className="size-3 animate-spin" /> Styling your look…
+            </p>
+          )}
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {QUICK_PROMPTS.map((q) => (
+            <button
+              key={q}
+              onClick={() => ask(q)}
+              className="border border-border px-2 py-1 text-[10px] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+            >
+              {q}
+            </button>
+          ))}
+        </div>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            ask(input);
+          }}
+          className="mt-3 flex items-end gap-2"
+        >
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                ask(input);
+              }
+            }}
+            rows={2}
+            placeholder="Ask AI Stylist…"
+            className="min-h-0 resize-none rounded-none text-xs"
+          />
+          <Button type="submit" size="icon" disabled={pending} className="rounded-none bg-gradient-neon text-foreground">
+            <Send className="size-4" />
+          </Button>
+        </form>
+      </section>
 
           {step === 3 && <div className="grid gap-2 border-t border-border p-4">
             <Button onClick={onRent} disabled={!activeProduct} className="w-full gap-2 rounded-none bg-gradient-neon text-foreground hover:opacity-90">

@@ -54,7 +54,11 @@ function TryOnPage() {
                 <h2 className="mt-2 font-display text-2xl">Bring your context with you.</h2>
                 <p className="mt-2 max-w-2xl text-xs text-muted-foreground">Copy this person-specific prompt, open ChatGPT Images in a new tab, and attach your photo and garment reference there.</p>
               </div>
-              <Button type="button" className="gap-2 rounded-none bg-gradient-neon text-foreground" onClick={copyPrompt}><Copy className="size-4" /> {copied ? "Copied · ChatGPT opened" : "Copy prompt & open ChatGPT Images"}</Button>
+              <Button asChild className="gap-2 rounded-none bg-gradient-neon text-foreground">
+                <a href="https://chatgpt.com/images" target="_blank" rel="noreferrer" onClick={() => void copyPrompt()}>
+                  <Copy className="size-4" /> {copied ? "Copied · ChatGPT opened" : "Copy prompt & open ChatGPT Images"}
+                </a>
+              </Button>
             </div>
             <textarea readOnly value={prompt} aria-label="Copyable ChatGPT Images try-on prompt" className="mt-4 min-h-28 w-full resize-y border border-border bg-background p-3 text-xs leading-relaxed outline-none" />
             <a href="https://chatgpt.com/images" target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-xs underline"><ExternalLink className="size-3.5" /> Open ChatGPT Images</a>
