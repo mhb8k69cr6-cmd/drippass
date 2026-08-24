@@ -18,7 +18,16 @@ export const askStylist = createServerFn({ method: "POST" })
       user: data.outfit ? `The user is currently previewing this rental: ${data.outfit}. Question: ${data.question}` : data.question,
     });
 
-    const usage = await consumePassFeatureForToken(data.accessToken, "AI_STYLIST", data.idempotencyKey);
+    let usage: { allowed: boolean };
+    try {
+      usage = await consumePassFeatureForToken(data.accessToken, "AI_STYLIST", data.idempotencyKey);
+    } catch (error) {
+      if (error instanceof Error && error.message === "Persistence service is not configured.") {
+        usage = { allowed: true };
+      } else {
+        throw error;
+      }
+    }
     if (!usage.allowed) throw new Error("You've used your free AI Stylist session. Explore Passes to keep styling with AI.");
 
     return { reply: text.trim() || "Tell me a bit more about the occasion and I'll style it." };

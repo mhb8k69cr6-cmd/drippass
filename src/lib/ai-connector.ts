@@ -23,7 +23,7 @@ function configuredProvider(): Provider {
     throw new Error("Drippass AI uses Hugging Face DeepSeek. Set AI_PROVIDER=huggingface.");
   }
   if (!process.env["HF_TOKEN"]) {
-    throw new Error("Drippass AI is not configured. Add HF_TOKEN to Vercel Environment Variables.");
+    throw new Error("Hugging Face DeepSeek is not configured. Add HF_TOKEN to your local .env and Vercel Environment Variables.");
   }
   return "huggingface";
 }

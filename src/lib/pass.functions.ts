@@ -97,8 +97,8 @@ const SessionInput = z.object({ accessToken: z.string().min(20) });
 const ConsumeInput = SessionInput.extend({ feature: z.enum(["AI_TRY_ON", "AI_STYLIST"]), idempotencyKey: z.string().min(8).max(120) });
 
 async function getAuthorizedClient(accessToken: string) {
-  const url = process.env["SUPABASE_URL"] ?? process.env["VITE_SUPABASE_URL"];
-  const key = process.env["SUPABASE_ANON_KEY"] ?? process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? process.env["VITE_SUPABASE_ANON_KEY"];
+  const url = process.env["SUPABASE_URL"] ?? process.env["VITE_SUPABASE_URL"] ?? import.meta.env["VITE_SUPABASE_URL"];
+  const key = process.env["SUPABASE_ANON_KEY"] ?? process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? process.env["VITE_SUPABASE_ANON_KEY"] ?? import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? import.meta.env["VITE_SUPABASE_ANON_KEY"];
   if (!url || !key) throw new Error("Persistence service is not configured.");
   const client = (await import("@supabase/supabase-js")).createClient(url, key, {
     global: { headers: { Authorization: `Bearer ${accessToken}` } },

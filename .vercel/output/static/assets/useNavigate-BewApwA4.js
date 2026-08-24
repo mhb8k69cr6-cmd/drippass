@@ -1,1 +1,0 @@
-import{a as e,n as t}from"./jsx-runtime-B-hcVAMW.js";function n(){throw Error(`Invariant failed`)}var r=e(t(),1),i=r.createContext(null);function a(e){return r.useContext(i)}function o(e){let t=a();return r.useCallback(n=>t.navigate({...n,from:n.from??e?.from}),[e?.from,t])}export{n as i,a as n,i as r,o as t};
