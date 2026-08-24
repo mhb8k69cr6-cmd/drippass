@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { PRODUCTS } from "@/data/products";
+import { consumeRentalCreditForToken } from "@/lib/pass.functions";
 
 const ItemInput = z.object({
   productId: z.string().min(1),
@@ -38,6 +39,8 @@ export const createSandboxOrder = createServerFn({ method: "POST" })
       if (days > 30 || end < start) throw new Error("Rental dates are invalid.");
       return { item, product, days, start, end };
     });
+    const credit = await consumeRentalCreditForToken(data.accessToken, products.length);
+    if (!credit.allowed) throw new Error("This rental requires a DRIPPASS plan. Choose a pass to start renting.");
     const rentalStart = products.reduce((date, item) => item.start < date ? item.start : date, products[0]!.start);
     const rentalEnd = products.reduce((date, item) => item.end > date ? item.end : date, products[0]!.end);
     const total = products.reduce((sum, item) => sum + item.product.perDay * item.days, 0);

@@ -18,7 +18,7 @@ function PassesPage() {
         <p className="text-xs tracking-luxe text-muted-foreground">DRIPPASS MEMBERSHIP</p>
         <h1 className="mt-3 font-display text-4xl md:text-6xl">Choose your rotation.</h1>
         <p className="mt-4 max-w-xl text-sm text-muted-foreground">
-          Compare the available plans. Membership activation is currently unavailable until billing and account services are connected.
+          Start with a Free Pass, then upgrade when you are ready for more rentals and unlimited styling.
         </p>
         <div className="mt-10">
           <SubscriptionPlans />

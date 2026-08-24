@@ -1,0 +1,9 @@
+DESCRIPTION: A sleek oversized leather jacket with a structured flight-inspired silhouette, oversized utility pockets, ribbed trims, and a rich dark-brown finish. Paired with relaxed brown trousers, it creates a refined contemporary look with a distinctly urban edge.
+SIZES: S, M, L, XL
+CATEGORY: Outerwear
+COLOR: Dark brown
+MATERIAL: Genuine Leather
+STOCK: IN STOCK
+SKU: OWT-002
+TAGS: leather, streetwear, utility, contemporary
+FEATURED: FALSE

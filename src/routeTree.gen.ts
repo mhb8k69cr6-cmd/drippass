@@ -16,6 +16,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TryOnRouteImport } from './routes/try-on'
 import { Route as RentIndexRouteImport } from './routes/rent/index'
 import { Route as RentSlugRouteImport } from './routes/rent/$slug'
+import { Route as CheckoutMembershipPlanRouteImport } from './routes/checkout/membership/$plan'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const RentSlugRoute = RentSlugRouteImport.update({
   path: '/rent/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutMembershipPlanRoute = CheckoutMembershipPlanRouteImport.update({
+  id: '/checkout/membership/$plan',
+  path: '/checkout/membership/$plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/try-on': typeof TryOnRoute
   '/rent/$slug': typeof RentSlugRoute
   '/rent/': typeof RentIndexRoute
+  '/checkout/membership/$plan': typeof CheckoutMembershipPlanRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/try-on': typeof TryOnRoute
   '/rent/$slug': typeof RentSlugRoute
   '/rent': typeof RentIndexRoute
+  '/checkout/membership/$plan': typeof CheckoutMembershipPlanRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/try-on': typeof TryOnRoute
   '/rent/$slug': typeof RentSlugRoute
   '/rent/': typeof RentIndexRoute
+  '/checkout/membership/$plan': typeof CheckoutMembershipPlanRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,9 +100,17 @@ export interface FileRouteTypes {
     | '/try-on'
     | '/rent/$slug'
     | '/rent/'
+    | '/checkout/membership/$plan'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/login' | '/passes' | '/signup' | '/try-on' | '/rent/$slug' | '/rent'
+    | '/'
+    | '/login'
+    | '/passes'
+    | '/signup'
+    | '/try-on'
+    | '/rent/$slug'
+    | '/rent'
+    | '/checkout/membership/$plan'
   id:
     | '__root__'
     | '/'
@@ -103,6 +120,7 @@ export interface FileRouteTypes {
     | '/try-on'
     | '/rent/$slug'
     | '/rent/'
+    | '/checkout/membership/$plan'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -113,6 +131,7 @@ export interface RootRouteChildren {
   TryOnRoute: typeof TryOnRoute
   RentSlugRoute: typeof RentSlugRoute
   RentIndexRoute: typeof RentIndexRoute
+  CheckoutMembershipPlanRoute: typeof CheckoutMembershipPlanRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -166,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RentSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/membership/$plan': {
+      id: '/checkout/membership/$plan'
+      path: '/checkout/membership/$plan'
+      fullPath: '/checkout/membership/$plan'
+      preLoaderRoute: typeof CheckoutMembershipPlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -177,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   TryOnRoute: TryOnRoute,
   RentSlugRoute: RentSlugRoute,
   RentIndexRoute: RentIndexRoute,
+  CheckoutMembershipPlanRoute: CheckoutMembershipPlanRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

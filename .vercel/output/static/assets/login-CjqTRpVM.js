@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-B-hcVAMW.js";import{t}from"./AuthPage-HOHKrD3a.js";var n=e(),r=()=>(0,n.jsx)(t,{mode:`login`});export{r as component};

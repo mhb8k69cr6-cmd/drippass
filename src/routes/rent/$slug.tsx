@@ -92,7 +92,9 @@ function ProductDetail() {
             <div className="mt-8 border-y border-border py-5">
               <p className="text-sm text-muted-foreground line-through">Retail ₹{product.retail.toLocaleString("en-IN")}</p>
               <p className="font-display text-4xl">₹{product.perDay.toLocaleString("en-IN")} <span className="font-sans text-sm text-muted-foreground">/ day</span></p>
-              <p className="mt-2 text-sm">{product.available ? "Available to reserve" : "Currently unavailable"}</p>
+              <p className={`mt-2 text-sm ${product.rentalStatus === "AVAILABLE" ? "text-emerald-600" : "text-muted-foreground"}`}>
+                {product.rentalStatus === "AVAILABLE" ? "Available to reserve" : product.rentalStatus === "RESERVED" ? "Currently Reserved" : "Not Available for Rent"}
+              </p>
             </div>
             <div className="mt-8">
               <p className="mb-3 text-xs tracking-luxe text-muted-foreground">SELECT SIZE</p>

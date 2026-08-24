@@ -1,0 +1,9 @@
+DESCRIPTION: A refined vintage-inspired double-breasted suit featuring a rich brown pinstripe jacket, crisp striped shirt and tie, cream trousers, and polished leather loafers. Its tailored silhouette and warm, sophisticated palette make it ideal for elevated evening or formal occasions.
+SIZES: S, M, L, XL
+CATEGORY: Suits
+COLOR: Brown, cream, white
+MATERIAL: Wool Blend
+STOCK: IN STOCK
+SKU: SUI-001
+TAGS: tailored, formalwear, vintage, luxury
+FEATURED: FALSE

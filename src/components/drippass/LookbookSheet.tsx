@@ -238,7 +238,7 @@ export function LookbookSheet({
               <div className="mt-4 space-y-2 text-left text-xs text-foreground">
                 <p className="font-medium">Unlimited VIP Pass</p>
                 <p>Swap access, instant delivery priority and exclusive styling perks.</p>
-                <Button size="sm" className="rounded-none bg-gradient-neon text-foreground" onClick={() => toast("Pass management coming soon")}>Manage Pass</Button>
+                <Button size="sm" className="rounded-none bg-gradient-neon text-foreground" onClick={() => window.location.assign("/passes")}>Manage Pass</Button>
               </div>
             </div>
           </TabsContent>

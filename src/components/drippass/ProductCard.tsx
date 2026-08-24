@@ -94,8 +94,8 @@ export function ProductCard({
             ₹{product.perDay}
             <span className="font-sans text-xs text-muted-foreground"> / day</span>
           </p>
-          <p className={`mt-1 text-xs ${product.available ? "text-foreground" : "text-destructive"}`}>
-            {product.available ? "● In stock — ships tomorrow" : "○ Sold out — join waitlist"}
+          <p className={`mt-1 text-xs ${product.rentalStatus === "AVAILABLE" ? "text-emerald-600" : "text-muted-foreground"}`}>
+            {product.rentalStatus === "AVAILABLE" ? "Available to reserve" : product.rentalStatus === "RESERVED" ? "Currently Reserved" : "Not Available for Rent"}
           </p>
         </div>
       </div>
