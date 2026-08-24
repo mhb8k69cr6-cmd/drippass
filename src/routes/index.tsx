@@ -61,7 +61,10 @@ function Home() {
   const [selected, setSelected] = useState<Product | null>(PRODUCTS[0] ?? null);
   const [modalOpen, setModalOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(window.localStorage.getItem("drippass.cart") ?? "[]") as CartItem[]; } catch { return []; }
+  });
   const { wishlist: saved, toggleWishlist: toggleSave, looks, saveLook, removeLook, setCaption } =
     useLookbook();
   const [accountOpen, setAccountOpen] = useState(false);
@@ -88,6 +91,16 @@ function Home() {
       setUserName(session?.user.user_metadata["display_name"] ?? session?.user.email?.split("@")[0] ?? null);
     });
     return () => data.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const syncCart = () => {
+      try { setCart(JSON.parse(window.localStorage.getItem("drippass.cart") ?? "[]") as CartItem[]); } catch { setCart([]); }
+      if (new URLSearchParams(window.location.search).get("cart") === "open") setCartOpen(true);
+    };
+    window.addEventListener("drippass:cart-updated", syncCart);
+    syncCart();
+    return () => window.removeEventListener("drippass:cart-updated", syncCart);
   }, []);
 
   const products = useMemo(() => {
@@ -135,7 +148,11 @@ function Home() {
       toast.error("Waitlist is unavailable: no persistence service is configured.");
       return;
     }
-    setCart((c) => (c.some((i) => i.product.id === product.id) ? c : [...c, { product, days, size }]));
+    setCart((c) => {
+      const next = c.some((i) => i.product.id === product.id) ? c : [...c, { product, days, size }];
+      window.localStorage.setItem("drippass.cart", JSON.stringify(next));
+      return next;
+    });
     setModalOpen(false);
     setCartOpen(true);
     toast.success(`${product.title} reserved for ${days} days`);

@@ -38,6 +38,10 @@ export function CartSheet({
   const rental = items.reduce((s, i) => s + i.product.perDay * i.days, 0);
   const deposit = items.reduce((s, i) => s + Math.round(i.product.retail * 0.1), 0);
   const total = Math.max(0, rental - discount) + deposit;
+  const removeItem = (id: string) => {
+    onRemove(id);
+    window.localStorage.setItem("drippass.cart", JSON.stringify(items.filter((item) => item.product.id !== id)));
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -63,7 +67,7 @@ export function CartSheet({
                   ₹{(product.perDay * days).toLocaleString("en-IN")}
                 </p>
               </div>
-              <button onClick={() => onRemove(product.id)} aria-label="Remove">
+              <button onClick={() => removeItem(product.id)} aria-label="Remove">
                 <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
               </button>
             </div>
@@ -156,7 +160,7 @@ export function CartSheet({
       <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
         <DialogContent className="rounded-none sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Sandbox checkout</DialogTitle>
+            <DialogTitle>Rental checkout</DialogTitle>
             <DialogDescription>
               This is a mock payment walkthrough. No real payment is processed; a successful test creates a rental order.
             </DialogDescription>
@@ -191,6 +195,8 @@ export function CartSheet({
                         })),
                       },
                     });
+                    items.forEach((item) => onRemove(item.product.id));
+                    window.localStorage.removeItem("drippass.cart");
                     setCheckoutState("success");
                     toast.success(`Rental order ${result.orderId.slice(0, 8)} confirmed.`);
                   } catch (error) {

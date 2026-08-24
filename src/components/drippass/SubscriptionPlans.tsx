@@ -9,17 +9,19 @@ import { currentAccessToken } from "@/lib/pass-client";
 
 export function SubscriptionPlans() {
   const [pass, setPass] = useState<PassState | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const loadPass = useServerFn(getPassState);
   const navigate = useNavigate();
 
   useEffect(() => {
     let active = true;
     void currentAccessToken().then((accessToken) => {
-      if (!accessToken) return;
+      if (!accessToken) { setError("Sign in to view and manage your pass."); setLoading(false); return; }
       return loadPass({ data: { accessToken } }).then((state) => {
         if (active) setPass(state);
       });
-    }).catch(() => undefined);
+    }).catch(() => { if (active) setError("Your pass details could not be loaded."); }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [loadPass]);
 
@@ -34,6 +36,8 @@ export function SubscriptionPlans() {
 
   return (
     <>
+      {loading && <p className="mb-6 text-sm text-muted-foreground">Loading your pass...</p>}
+      {error && <p role="alert" className="mb-6 border border-destructive/40 p-4 text-sm text-destructive">{error}</p>}
       {pass && (
         <section className="mb-6 border border-border bg-card p-5 shadow-soft">
           <p className="text-[10px] tracking-luxe text-muted-foreground">YOUR DRIPPASS</p>
@@ -52,7 +56,7 @@ export function SubscriptionPlans() {
         <div
           key={plan.name}
           className={`flex flex-col border p-6 ${
-            plan.highlight ? "border-foreground bg-card shadow-soft" : "border-border bg-card"
+            plan.highlight ? "rounded-2xl border-foreground bg-transparent shadow-soft" : "rounded-2xl border-border bg-transparent"
           }`}
         >
           {plan.highlight && (

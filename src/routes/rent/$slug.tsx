@@ -4,8 +4,7 @@ import { CalendarDays, Check, ChevronLeft, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { getProductBySlug } from "@/data/products";
+import { getProductBySlug, type Product } from "@/data/products";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/rent/$slug")({
@@ -35,21 +34,19 @@ function ProductDetail() {
   const [size, setSize] = useState<string>();
   const [startDate, setStartDate] = useState(() => new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10));
   const [endDate, setEndDate] = useState(() => new Date(Date.now() + 10 * 86400000).toISOString().slice(0, 10));
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [cardNumber, setCardNumber] = useState("");
-  const [checkoutState, setCheckoutState] = useState<"idle" | "processing" | "success" | "declined">("idle");
 
   const rentalDays = Math.max(1, Math.round((new Date(`${endDate}T00:00:00Z`).getTime() - new Date(`${startDate}T00:00:00Z`).getTime()) / 86400000));
-  const rentalTotal = rentalDays * product.perDay;
-  const deposit = Math.round(product.retail * 0.1);
-
-  const openCheckout = () => {
+  const addToRentalCart = () => {
     if (new Date(`${endDate}T00:00:00Z`) < new Date(`${startDate}T00:00:00Z`)) {
       toast.error("Choose an end date after the start date.");
       return;
     }
-    setCheckoutState("idle");
-    setCheckoutOpen(true);
+    const existing = JSON.parse(window.localStorage.getItem("drippass.cart") ?? "[]") as Array<{ product: Product; days: number; size: string }>;
+    const next = existing.some((item) => item.product.id === product.id) ? existing : [...existing, { product, days: rentalDays, size }];
+    window.localStorage.setItem("drippass.cart", JSON.stringify(next));
+    window.dispatchEvent(new Event("drippass:cart-updated"));
+    toast.success(`${product.title} added to your rental cart`);
+    window.location.assign("/?cart=open");
   };
 
   return (
@@ -118,45 +115,11 @@ function ProductDetail() {
             <Button
               className="mt-8 h-12 w-full rounded-none bg-gradient-neon text-foreground"
               disabled={!product.available || !size}
-              onClick={openCheckout}
+              onClick={addToRentalCart}
             >
-              <CalendarDays className="size-4" /> {product.available ? (size ? "Continue to sandbox checkout" : "Select a size to continue") : "Waitlist unavailable"}
+              <CalendarDays className="size-4" /> {product.available ? (size ? "Add to rental cart" : "Select a size to continue") : "Waitlist unavailable"}
             </Button>
             <Link to="/try-on" search={{ product: product.slug }} className="mt-3 inline-flex w-full items-center justify-center border border-border px-4 py-3 text-sm hover:bg-muted">Try this garment in AI Studio</Link>
-            {product.available && size && (
-              <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
-                <DialogContent className="rounded-none sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Sandbox checkout</DialogTitle>
-                    <DialogDescription>No real payment or reservation is made. This is a test walkthrough.</DialogDescription>
-                  </DialogHeader>
-                  <form
-                    className="space-y-4"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  setCheckoutState("processing");
-                  window.setTimeout(() => setCheckoutState(cardNumber.replace(/\s/g, "").endsWith("0002") ? "declined" : "success"), 700);
-                }}
-              >
-                <div>
-                  <p className="text-xs tracking-luxe text-muted-foreground">SANDBOX CHECKOUT</p>
-                  <p className="mt-1 text-sm">{size} · {rentalDays} days · ₹{(rentalTotal + deposit).toLocaleString("en-IN")} total</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{startDate} to {endDate}</p>
-                </div>
-                {checkoutState === "success" ? (
-                  <div className="border border-border p-3 text-sm"><p className="font-medium">Sandbox payment approved</p><p className="mt-1 text-xs text-muted-foreground">Your test walkthrough is complete. No order was created.</p></div>
-                ) : (
-                  <>
-                    <div className="space-y-1"><label htmlFor="detail-card" className="text-xs">Test card number</label><Input id="detail-card" required inputMode="numeric" value={cardNumber} onChange={(event) => setCardNumber(event.target.value)} placeholder="4242 4242 4242 4242" /></div>
-                    <div className="grid grid-cols-2 gap-3"><div className="space-y-1"><label htmlFor="detail-expiry" className="text-xs">Expiry</label><Input id="detail-expiry" required placeholder="12/30" /></div><div className="space-y-1"><label htmlFor="detail-cvc" className="text-xs">CVC</label><Input id="detail-cvc" required inputMode="numeric" placeholder="123" /></div></div>
-                    {checkoutState === "declined" && <p className="text-sm text-destructive">Sandbox decline. Use a different test card.</p>}
-                    <div className="flex gap-2"><Button type="button" variant="outline" className="rounded-none" onClick={() => setCheckoutOpen(false)}>Cancel</Button><Button type="submit" disabled={checkoutState === "processing"} className="flex-1 rounded-none bg-gradient-neon text-foreground">{checkoutState === "processing" ? "Processing…" : "Run sandbox payment"}</Button></div>
-                  </>
-                )}
-                  </form>
-                </DialogContent>
-              </Dialog>
-            )}
             <div className="mt-8 space-y-3 border border-border p-5 text-sm">
               <p className="flex items-center gap-2"><ShieldCheck className="size-4 text-gold" /> Dry-cleaned and disinfected before delivery</p>
               <p className="flex items-center gap-2"><Check className="size-4 text-gold" /> Prepaid return bag and pickup included</p>

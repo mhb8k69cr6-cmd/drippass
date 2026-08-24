@@ -53,6 +53,8 @@ export function AIStudio({
   const [consent, setConsent] = useState(false);
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [step, setStep] = useState(1);
+  const [generatedPhoto, setGeneratedPhoto] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
@@ -60,6 +62,7 @@ export function AIStudio({
     },
   ]);
   const fileRef = useRef<HTMLInputElement>(null);
+  const generatedFileRef = useRef<HTMLInputElement>(null);
   const send = useServerFn(askStylist);
 
   useEffect(() => setActiveProduct(product), [product]);
@@ -70,6 +73,13 @@ export function AIStudio({
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => setUserPhoto(String(reader.result));
+    reader.readAsDataURL(file);
+  };
+
+  const handleGeneratedFile = (file?: File) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setGeneratedPhoto(String(reader.result));
     reader.readAsDataURL(file);
   };
 
@@ -109,7 +119,6 @@ export function AIStudio({
         if (!response.ok) throw new Error("The garment image could not be downloaded.");
         return response.blob();
       });
-      await navigator.clipboard.writeText(prompt);
       const accessToken = await currentAccessToken();
       if (!accessToken) throw new Error("Log in to use AI Try-On and receive your Free Pass allowance.");
       const usage = await consume(accessToken, "AI_TRY_ON", crypto.randomUUID());
@@ -123,18 +132,26 @@ export function AIStudio({
         const url = URL.createObjectURL(blob);
         link.href = url;
         link.download = filename;
+        document.body.appendChild(link);
         link.click();
-        URL.revokeObjectURL(url);
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       };
-      download(personBlob, "drippass_person_photo.jpg");
-      download(garmentBlob, "drippass_garment_photo.jpg");
+      try {
+        await navigator.clipboard.writeText(prompt);
+      } catch {
+        toast.info("Prompt copying was blocked. The prompt remains available to select manually.");
+      }
+      download(personBlob, "1_person_photo.jpg");
+      download(garmentBlob, "2_garment_photo.jpg");
       if (chatgptWindow) {
         chatgptWindow.location.href = "https://chatgpt.com/images";
       } else {
         toast.info("Your browser blocked the new tab. Open ChatGPT Images manually to continue.");
       }
       setCopied(true);
-      toast.success("Both images downloaded and prompt copied. Upload them to ChatGPT Images, then paste the prompt.");
+      setStep(3);
+      toast.success("Prompt copied, ChatGPT Images opened, and both images downloaded separately.");
     } catch (error) {
       chatgptWindow?.close();
       toast.error(error instanceof Error ? error.message : "Try-on generation failed.");
@@ -150,7 +167,10 @@ export function AIStudio({
   };
 
   const saveCurrentLook = () => {
-    if (!activeProduct) return;
+    if (!activeProduct || !generatedPhoto) {
+      toast.error("Upload the generated ChatGPT image before saving this look.");
+      return;
+    }
     setSaved(true);
     toast.success("Look saved to your account!");
   };
@@ -174,13 +194,13 @@ export function AIStudio({
       <div className="flex items-center justify-between border-b border-border bg-gradient-luxe px-4 py-3 text-primary-foreground">
             <div>
               <h2 className="font-display text-base leading-tight">AI Visual Try-On Studio</h2>
-              <p className="text-[10px] tracking-luxe opacity-70">FITTING ROOM & STYLIST</p>
+              <p className="text-[10px] tracking-luxe opacity-70">STEP {step} OF 3 · FITTING ROOM & STYLIST</p>
             </div>
           </div>
 
           <div className="flex-1 space-y-5 overflow-y-auto p-4">
               {/* Step 1 */}
-        <section>
+        <section className={step === 1 ? "" : "hidden"}>
           <p className="mb-2 text-[10px] tracking-luxe text-muted-foreground">STEP 1 — YOUR PHOTO</p>
           {!activeProduct ? (
             <div className="border border-border bg-muted/30 p-5 text-center">
@@ -224,12 +244,13 @@ export function AIStudio({
             </Label>
             <Switch id="privacy" checked={localOnly} onCheckedChange={setLocalOnly} />
           </div>
+          <Button type="button" className="mt-5 w-full rounded-none bg-gradient-neon text-foreground" disabled={!userPhoto || !activeProduct} onClick={() => setStep(2)}>Continue to consent</Button>
         </section>
 
-        <Separator />
+        {step === 1 && <Separator />}
 
         {/* Step 2 */}
-        <section>
+        <section className={step === 2 ? "" : "hidden"}>
           <p className="mb-2 text-[10px] tracking-luxe text-muted-foreground">STEP 2 — INSTANT FIT PREVIEW · FREE PASS ACCESS</p>
           <div className="relative aspect-[3/4] overflow-hidden border border-border bg-muted">
             {userPhoto ? (
@@ -259,13 +280,22 @@ export function AIStudio({
             <Button type="button" onClick={runTryOn} disabled={!userPhoto || !activeProduct || !consent || generating} className="w-full rounded-none bg-gradient-neon text-foreground">
               {generating ? "Preparing ChatGPT Images…" : copied ? "Prompt copied · ChatGPT Images opened" : "Generate try-on"}
             </Button>
+            <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">Instructions: ChatGPT Images opens in a new tab. Upload both downloaded files, paste the copied prompt, generate the image, then return here and upload the generated result.</p>
           </div>
         </section>
 
-        <Separator />
+        {step === 2 && <Separator />}
 
         {/* Step 3 */}
-        <section>
+        <section className={step === 3 ? "" : "hidden"}>
+          <p className="mb-2 text-[10px] tracking-luxe text-muted-foreground">STEP 3 — SAVE YOUR GENERATED LOOK</p>
+          <div className="border border-dashed border-border p-5 text-center">
+            {generatedPhoto ? <img src={generatedPhoto} alt="Generated ChatGPT try-on" className="mx-auto max-h-[420px] w-full object-contain" /> : <p className="text-sm text-muted-foreground">Upload the image you generated in ChatGPT Images.</p>}
+            <input ref={generatedFileRef} type="file" accept="image/*" hidden onChange={(event) => handleGeneratedFile(event.target.files?.[0])} />
+            <Button type="button" variant="outline" className="mt-4 rounded-none" onClick={() => generatedFileRef.current?.click()}>Upload generated image</Button>
+          </div>
+          <Button type="button" variant="outline" className="mt-3 w-full rounded-none" disabled={!generatedPhoto || !activeProduct} onClick={() => { saveCurrentLook(); onSave({ photo: generatedPhoto, fit: 55, pose: 2 }); }}><Bookmark className="size-3.5" /> Save to lookbook / wishlist</Button>
+          <Separator className="my-6" />
           <p className="mb-2 text-[10px] tracking-luxe text-muted-foreground">STEP 3 — ASK AI STYLIST · 1 FREE SESSION</p>
           <div className="space-y-3">
             {messages.map((m, i) => (
@@ -326,15 +356,15 @@ export function AIStudio({
         </section>
       </div>
 
-          <div className="grid gap-2 border-t border-border p-4">
+          {step === 3 && <div className="grid gap-2 border-t border-border p-4">
             <Button onClick={onRent} disabled={!activeProduct} className="w-full gap-2 rounded-none bg-gradient-neon text-foreground hover:opacity-90">
               <ShoppingBag className="size-4" /> Rent This Outfit
             </Button>
             <div className="grid grid-cols-2 gap-2">
               <Button
                 variant="outline"
-                onClick={() => { saveCurrentLook(); onSave({ photo: userPhoto, fit: 55, pose: 2 }); }}
-                disabled={!activeProduct}
+                onClick={() => { saveCurrentLook(); onSave({ photo: generatedPhoto, fit: 55, pose: 2 }); }}
+                disabled={!activeProduct || !generatedPhoto}
                 className="gap-1.5 rounded-none text-xs"
               >
                 <Bookmark className="size-3.5" /> {saved ? "Saved ♥" : "Save Look"}
@@ -350,7 +380,7 @@ export function AIStudio({
             <p className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
               <Sparkles className="size-3" /> Powered by DRIPPASS AI
             </p>
-          </div>
+          </div>}
       </section>
       <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
       <DialogContent className="rounded-none sm:max-w-2xl">

@@ -6,6 +6,7 @@ import { PRODUCTS, getProductBySlug } from "@/data/products";
 import { buildTryOnPrompt } from "@/lib/try-on-prompt";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useLookbook } from "@/lib/lookbook";
 
 export const Route = createFileRoute("/try-on")({
   validateSearch: (search) => ({ product: typeof search["product"] === "string" ? search["product"] : undefined }),
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/try-on")({
 function TryOnPage() {
   const { product: productSlug } = Route.useSearch();
   const product = getProductBySlug(productSlug ?? "") ?? PRODUCTS[0] ?? null;
+  const { saveLook } = useLookbook();
   const [copied, setCopied] = useState(false);
   const prompt = buildTryOnPrompt(product?.title ?? "[INSERT GARMENT NAME]", product?.designer ?? "[INSERT BRAND NAME]");
 
@@ -60,7 +62,11 @@ function TryOnPage() {
           <AIStudio
             product={product}
             onRent={() => { if (product) window.location.assign(`/rent/${product.slug}`); }}
-            onSave={() => undefined}
+            onSave={(look) => {
+              if (!product || !look.photo) return;
+              saveLook({ productId: product.id, title: product.title, designer: product.designer, category: product.category, image: look.photo, photo: look.photo, fit: look.fit, pose: look.pose });
+              toast.success("Generated look saved to your lookbook.");
+            }}
           />
         </div>
       </div>
