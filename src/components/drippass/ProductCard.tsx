@@ -49,15 +49,21 @@ export function ProductCard({
             {product.badge}
           </Badge>
         )}
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onSave();
+          }}
+          aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
+          aria-pressed={saved}
+          className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-white/80 text-foreground shadow-sm backdrop-blur transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
+        >
+          <Heart className={`size-4 ${saved ? "fill-destructive text-destructive" : ""}`} />
+        </button>
         {!href && (
           <>
-            <button
-              onClick={onSave}
-              aria-label="Save to lookbook"
-              className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-background/90 backdrop-blur"
-            >
-              <Heart className={`size-4 ${saved ? "fill-destructive text-destructive" : ""}`} />
-            </button>
             <Button
               onClick={onTryOn}
               size="sm"
